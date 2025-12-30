@@ -1,0 +1,6 @@
+@DentalHealthSaaS_HostAddress = http://localhost:5032
+
+GET {{DentalHealthSaaS_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
