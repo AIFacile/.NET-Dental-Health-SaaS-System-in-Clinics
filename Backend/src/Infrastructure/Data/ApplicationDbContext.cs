@@ -1,4 +1,5 @@
-﻿using DentalHealthSaaS.Backend.src.Domain.Appointments;
+﻿using DentalHealthSaaS.Backend.src.Application.Abstractions.Tenant;
+using DentalHealthSaaS.Backend.src.Domain.Appointments;
 using DentalHealthSaaS.Backend.src.Domain.Auditing;
 using DentalHealthSaaS.Backend.src.Domain.Common;
 using DentalHealthSaaS.Backend.src.Domain.Diagnoses;
@@ -11,15 +12,24 @@ using DentalHealthSaaS.Backend.src.Domain.Treatments;
 using DentalHealthSaaS.Backend.src.Domain.Users;
 using DentalHealthSaaS.Backend.src.Domain.Visits;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        private readonly ITenantContext _tenantContext;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            ITenantContext tenantContext) 
+            : base(options)
         {
-            
+            _tenantContext = tenantContext;
         }
+
+        public Guid? CurrentTenantId =>
+            _tenantContext.HasTenant ? _tenantContext.TenantId : null!;
 
         // ========== SaaS ==========
         public DbSet<Tenant> Tenants => Set<Tenant>();
@@ -48,6 +58,23 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                // Tenant filter
+                if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .HasQueryFilter(CreateTenantFilter(entityType.ClrType));
+                }
+
+                // Soft delete filter
+                if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+                {
+                    modelBuilder.Entity(entityType.ClrType)
+                        .HasQueryFilter(CreateSoftDeleteFilter(entityType.ClrType));
+                }
+            }
+
             ConfigureBaseEntity(modelBuilder);
             ConfigureTenant(modelBuilder);
             ConfigureUser(modelBuilder);
@@ -58,7 +85,51 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
             ConfigureOthers(modelBuilder);
 
             SeedData(modelBuilder);
+
         }
+
+        private LambdaExpression CreateTenantFilter(Type entityType)
+        {
+            var parameter = Expression.Parameter(entityType, "e");
+
+            // e.TenantId
+            var entityTenantId = Expression.Convert(
+                Expression.Property(parameter, 
+                nameof(ITenantEntity.TenantId)),
+                typeof(Guid?));
+
+
+            // this.CurrentTenantId
+            var contextTenantId = Expression.Property(
+                Expression.Constant(this),
+                nameof(CurrentTenantId));
+
+            // CurrentTenantId == null
+            var noTenant = Expression.Equal(
+                contextTenantId,
+                Expression.Constant(null, typeof(Guid?)));
+
+            // e.TenantId == CurrentTenantId
+            var tenantMatch = Expression.Equal(
+                entityTenantId,
+                contextTenantId);
+
+            // CurrentTenantId == null || e.TenantId == CurrentTenantId
+            var body = Expression.OrElse(noTenant, tenantMatch);
+
+            return Expression.Lambda(body, parameter);
+        }
+
+        private LambdaExpression CreateSoftDeleteFilter(Type entityType)
+        {
+            var parameter = Expression.Parameter(entityType, "e");
+
+            var property = Expression.Property(parameter, nameof(ISoftDelete.IsDeleted));
+            var body = Expression.Equal(property, Expression.Constant(false));
+
+            return Expression.Lambda(body, parameter);
+        }
+
 
         // ----------------------------------------------------
         // BaseEntity

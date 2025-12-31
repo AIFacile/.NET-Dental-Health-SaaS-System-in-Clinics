@@ -1,5 +1,11 @@
 ﻿namespace DentalHealthSaaS.Backend.src.Domain.Auditing
 {
+    /// <summary>
+    /// Represents an audit log entry that records actions performed on entities within a tenant context.
+    /// </summary>
+    /// <remarks>Use this class to track changes or operations performed by users on specific entities for
+    /// auditing and compliance purposes. Each entry includes information about the affected entity, the action taken,
+    /// the user who performed the action, and the time the action occurred.</remarks>
     public class AuditLog
     {
         public Guid Id { get; set; }

@@ -14,5 +14,6 @@
 
         Guid UpdatedBy { get; set; }
         DateTime UpdatedAt { get; set; }
+        Guid TenantId { get; set; }
     }
 }

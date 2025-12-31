@@ -1,18 +1,20 @@
 ﻿using DentalHealthSaaS.Backend.src.Application.Abstractions.Security;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace DentalHealthSaaS.Backend.src.Infrastructure.Identity
 {
-    public class UserContext : IUserContext
+    /// <summary>
+    /// Provides access to information about the currently authenticated user within the HTTP context.
+    /// </summary>
+    /// <remarks>This class retrieves user identity details, such as user ID and user name, from the current
+    /// HTTP context. It is typically used in web applications to obtain information about the user making the current
+    /// request. If no user is authenticated, attempts to access the user ID will result in an exception.</remarks>
+    public class UserContext(IHttpContextAccessor http) : IUserContext
     {
-        private readonly IHttpContextAccessor _http;
+        private readonly IHttpContextAccessor _http = http;
 
-        public UserContext(IHttpContextAccessor http)
-        {
-            _http = http;
-        }
-
-        Guid IUserContext.UserId
+        public Guid UserId
         {
             get
             {
@@ -26,16 +28,18 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Identity
                 return Guid.Parse(userIdClaim.Value);
             }
         }
-        string IUserContext.UserName
+        public string UserName
         {
             get
             {
-                var nameClaim = _http.HttpContext?
-                    .User?
-                    .FindFirst(ClaimTypes.Name);
-
-                return nameClaim?.Value ?? "System";
+                return !HasUser
+                    ? throw new UnauthorizedAccessException("User not resolved.")
+                    : _http.HttpContext!.User.FindFirst(UserName)!.Value;
             }
         }
+        public bool HasUser =>
+            _http.HttpContext?
+            .User?
+            .HasClaim(u => u.Type == JwtRegisteredClaimNames.Sub) == true;
     }
 }
