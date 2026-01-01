@@ -1,8 +1,8 @@
-﻿using DentalHealthSaaS.Backend.src.Domain.Common;
+﻿using DentalHealthSaaS.Backend.src.Domain.Appointments;
 
-namespace DentalHealthSaaS.Backend.src.Domain.Appointments
+namespace DentalHealthSaaS.Backend.src.Application.DTOs.Appointments
 {
-    public class Appointment : BaseEntity
+    public class AppointmentDto
     {
         public Guid PatientId { get; set; }
         public Guid DoctorId { get; set; }

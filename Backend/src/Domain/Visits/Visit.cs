@@ -14,7 +14,7 @@ namespace DentalHealthSaaS.Backend.src.Domain.Visits
 
         public DateTime VisitDate { get; set; }
         public string VisitType { get; set; } = "Initial";
-        public string Status { get; set; } = "Open";
+        public VisitStatus Status { get; set; } = VisitStatus.Open;
 
         public Guid DoctorId { get; set; }
 

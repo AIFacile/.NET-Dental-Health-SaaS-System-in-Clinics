@@ -3,6 +3,7 @@ using DentalHealthSaaS.Backend.src.Application.Abstractions.Security;
 using DentalHealthSaaS.Backend.src.Application.DTOs.Diagnoses;
 using DentalHealthSaaS.Backend.src.Application.Mappings;
 using DentalHealthSaaS.Backend.src.Domain.Diagnoses;
+using DentalHealthSaaS.Backend.src.Domain.Visits;
 using DentalHealthSaaS.Backend.src.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,7 +29,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 && v.PatientId == patientId) 
                 ?? throw new Exception("Visit does not belong to a patient.");
 
-            if (visit.Status != "Diagnosed" && visit.Status != "In Treatment")
+            if (visit.Status != VisitStatus.Diagnosed && visit.Status != VisitStatus.InTreatment)
                 throw new Exception("Cannot add diagnosis to visit in current status.");                
 
             var diagnosis = dto.ToEntity(patientId, _user.UserId);

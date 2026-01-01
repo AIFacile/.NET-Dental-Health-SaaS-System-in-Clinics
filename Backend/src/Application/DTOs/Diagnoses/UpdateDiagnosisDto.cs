@@ -7,12 +7,12 @@
         public string Status { get; set; } = "Confirmed";
         public string? Summary { get; set; }
 
-        public List<DiagnosisItemDto> Items { get; set; } = [];
+        public List<UpdateDiagnosisItemDto> Items { get; set; } = [];
     }
 
     public class UpdateDiagnosisItemDto
     {
-        Guid Id { get; set; }
+        public Guid? Id { get; set; }
 
         public string ToothPosition { get; set; } = null!;
         public string DiseaseName { get; set; } = null!;

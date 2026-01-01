@@ -22,10 +22,9 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Identity
                     .User?
                     .FindFirst(ClaimTypes.NameIdentifier);
 
-                if (userIdClaim == null)
-                    throw new UnauthorizedAccessException("User is NOT authenticated.");
-
-                return Guid.Parse(userIdClaim.Value);
+                return userIdClaim == null 
+                    ? throw new UnauthorizedAccessException("User is NOT authenticated.") 
+                    : Guid.Parse(userIdClaim.Value);
             }
         }
         public string UserName

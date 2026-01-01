@@ -15,9 +15,10 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
         {
             var visit = await GetVisitOrThrow(visitId);
 
-            if (visit.Status == "Completed") throw new Exception("Completed visit cannot be canceled.");
+            if (visit.Status == VisitStatus.Cancelled)
+                throw new Exception("Completed visit cannot be canceled.");
 
-            visit.Status = "Cancelled";
+            visit.Status = VisitStatus.Cancelled;
             await _db.SaveChangesAsync();
         }
 
@@ -25,10 +26,10 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
         {
             var visit = await GetVisitOrThrow(visitId);
 
-            if (visit.Status != "In Treatment")
+            if (visit.Status != VisitStatus.InTreatment)
                 throw new Exception("Treatment not completed.");
 
-            visit.Status = "Completed";
+            visit.Status = VisitStatus.Completed;
             await _db.SaveChangesAsync();
         }
 
@@ -46,7 +47,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 PatientId = dto.PatientId,
                 DoctorId = dto.DoctorId,
                 VisitDate = dto.VisitDate,
-                Status = "Open"
+                Status = VisitStatus.Open
             };
 
             _db.Visits.Add(visit);
@@ -81,10 +82,10 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
         {
             var visit = await GetVisitOrThrow(visitId);
 
-            if (visit.Status != "Open")
+            if (visit.Status != VisitStatus.Open)
                 throw new Exception("Visit is not in open status.");
 
-            visit.Status = "Diagnosed";
+            visit.Status = VisitStatus.Diagnosed;
             await _db.SaveChangesAsync();
         }
 
@@ -92,10 +93,10 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
         {
             var visit = await GetVisitOrThrow(visitId);
 
-            if (visit.Status != "Diagnosed")
+            if (visit.Status != VisitStatus.Diagnosed)
                 throw new Exception("Diagnosis not completed.");
 
-            visit.Status = "In Treatment";
+            visit.Status = VisitStatus.InTreatment;
             await _db.SaveChangesAsync();
         }
 
