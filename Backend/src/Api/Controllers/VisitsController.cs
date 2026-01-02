@@ -5,12 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace DentalHealthSaaS.Backend.src.Api.Controllers
 {
     [ApiController]
-    [Route("/api/visits")]
     public class VisitsController(IVisitService service) : ControllerBase
     {
         private readonly IVisitService _service = service;
 
-        [HttpPost]
+        [HttpPost("/api/visits")]
         public async Task<ActionResult<VisitDto>> Create(
             CreateVisitDto dto)
         {
@@ -20,7 +19,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         // GET /api/visits/{id}
-        [HttpGet("/{id:guid}")]
+        [HttpGet("/api/visits/{id:guid}")]
         public async Task<ActionResult<IReadOnlyList<VisitDto>>> GetById(Guid id)
             => Ok(await _service.GetById(id));
 
@@ -30,7 +29,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             => Ok(await _service.GetByPatientsAsync(patientId));
 
         // POST /api/visits/{id}/start-diagnosis
-        [HttpPost("/{id:guid}/start-diagnosis")]
+        [HttpPost("/api/visits/{id:guid}/start-diagnosis")]
         public async Task<IActionResult> StartDiagnosis(Guid id)
         {
             await _service.StartDiagnosisAsync(id);
@@ -38,7 +37,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         // POST /api/visits/{id}/start-treatment
-        [HttpPost("/{id:guid}/start-treatment")]
+        [HttpPost("/api/visits/{id:guid}/start-treatment")]
         public async Task<IActionResult> StartTreatment(Guid id)
         {
             await _service.StartTreatmentAsync(id);
@@ -46,7 +45,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         // POST /api/visits/{id}/complete
-        [HttpPost("/{id:guid}/complete")]
+        [HttpPost("/api/visits/{id:guid}/complete")]
         public async Task<IActionResult> Complete(Guid id)
         {
             await _service.CompleteAsync(id);
@@ -54,7 +53,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         // POST /api/visits/{id}/complete
-        [HttpPost("/{id:guid}/cancel")]
+        [HttpPost("/api/visits/{id:guid}/cancel")]
         public async Task<IActionResult> Cancel(Guid id)
         {
             await _service.CancelAsync(id);

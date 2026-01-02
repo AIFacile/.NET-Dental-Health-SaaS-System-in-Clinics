@@ -1,4 +1,5 @@
-﻿using DentalHealthSaaS.Backend.src.Domain.Users;
+﻿using DentalHealthSaaS.Backend.src.Application.Security;
+using DentalHealthSaaS.Backend.src.Domain.Users;
 using DentalHealthSaaS.Backend.src.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,18 +21,18 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Auth
                 .Select(ur => ur.Role.Name)
                 .ToListAsync();
 
+            var permissions = ResolvePermissions(roles);
+
             var claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Username),
                 new("tenant_id", user.TenantId.ToString()),
-                // Add Role
-                // Add Permissions
             };
 
             foreach (var role in roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
             }
 
             var key = new SymmetricSecurityKey(
@@ -40,14 +41,37 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Auth
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
             var token = new JwtSecurityToken(
-                //issuer: _config["Jwt:Issuer"],
-                //audience: _config["Jwt:Audience"],
                 claims: claims,
                 expires: DateTime.UtcNow.AddHours(8),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private static IReadOnlyCollection<string> ResolvePermissions(
+            IReadOnlyCollection<RoleName> roles)
+        {
+            var permissions = new HashSet<string>();
+
+            foreach (var role in roles)
+            {
+                if (!RolePermissions.Map.TryGetValue(role, out var rolePermissions))
+                    continue;
+
+                // SuperAdmin shortcut
+                if (rolePermissions.Contains("*"))
+                {
+                    return Permissions.All;
+                }
+
+                foreach (var permission in rolePermissions)
+                {
+                    permissions.Add(permission);
+                }
+            }
+
+            return permissions;
         }
     }
 }

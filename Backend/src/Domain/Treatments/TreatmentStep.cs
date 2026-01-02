@@ -11,6 +11,6 @@
         public required string Description { get; set; }
 
         public decimal Cost { get; set; }
-        public string Status { get; set; } = "Pending";
+        public TreatmentStepStatus Status { get; set; } = TreatmentStepStatus.Pending;
     }
 }

@@ -364,9 +364,9 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
             // Roles
             // =========================
             modelBuilder.Entity<Role>().HasData(
-                new Role { Id = SeedConstants.RoleAdminId, Name = "Admin" },
-                new Role { Id = SeedConstants.RoleDoctorId, Name = "Doctor" },
-                new Role { Id = SeedConstants.RoleAssistantId, Name = "Assistant" }
+                new Role { Id = SeedConstants.RoleAdminId, Name = RoleName.SuperAdmin },
+                new Role { Id = SeedConstants.RoleDoctorId, Name = RoleName.Doctor },
+                new Role { Id = SeedConstants.RoleAssistantId, Name = RoleName.Assistant }
             );
 
             // =========================
@@ -444,7 +444,7 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                 PatientId = SeedConstants.Patient1Id,
                 VisitDate = new DateTime(2024, 1, 15),
                 VisitType = "Initial",
-                Status = "Open",
+                Status = VisitStatus.Open,
                 DoctorId = SeedConstants.DoctorUserId,
                 Notes = "Initial consultation",
                 CreatedAt = new DateTime(2024, 1, 15),
@@ -492,7 +492,7 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                 PatientId = SeedConstants.Patient1Id,
                 PlanType = "Filling",
                 EstimatedCost = 200m,
-                Status = "Approved",
+                Status = TreatmentPlanStatus.Approved,
                 CreatedAt = new DateTime(2024, 1, 16),
                 CreatedBy = SeedConstants.DoctorUserId,
                 UpdatedAt = new DateTime(2024, 1, 16),
@@ -506,7 +506,7 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                 StepOrder = 1,
                 Description = "Composite filling",
                 Cost = 200m,
-                Status = "Pending"
+                Status = TreatmentStepStatus.Pending
             });
         }
     }

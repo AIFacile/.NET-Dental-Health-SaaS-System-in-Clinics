@@ -11,6 +11,6 @@ namespace DentalHealthSaaS.Backend.src.Domain.Payments
         public string PaymentMethod { get; set; } = "Cash";
         public DateTime PaidAt { get; set; }
 
-        public string Status { get; set; } = "Paid";
+        public PaymentStatus Status { get; set; } = PaymentStatus.Unpaid;
     }
 }

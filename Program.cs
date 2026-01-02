@@ -1,14 +1,19 @@
 using DentalHealthSaaS.Backend.src.Application.Abstractions.Diagnoses;
+using DentalHealthSaaS.Backend.src.Application.Abstractions.HealthRecords;
 using DentalHealthSaaS.Backend.src.Application.Abstractions.Patients;
+using DentalHealthSaaS.Backend.src.Application.Abstractions.Payments;
 using DentalHealthSaaS.Backend.src.Application.Abstractions.Security;
 using DentalHealthSaaS.Backend.src.Application.Abstractions.Tenant;
+using DentalHealthSaaS.Backend.src.Application.Abstractions.TreatmentPlans;
 using DentalHealthSaaS.Backend.src.Application.Abstractions.Visits;
 using DentalHealthSaaS.Backend.src.Application.Services;
 using DentalHealthSaaS.Backend.src.Infrastructure.Auth;
+using DentalHealthSaaS.Backend.src.Infrastructure.Auth.Handlers;
 using DentalHealthSaaS.Backend.src.Infrastructure.Data;
 using DentalHealthSaaS.Backend.src.Infrastructure.Identity;
 using DentalHealthSaaS.Backend.src.Infrastructure.Tenants;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -42,7 +47,11 @@ namespace DentalHealthSaaS
             builder.Services.AddScoped<IPatientService, PatientService>();
             builder.Services.AddScoped<IDiagnosisService, DiagnosisService>();
             builder.Services.AddScoped<IVisitService, VisitService>();
+            builder.Services.AddScoped<ITreatmentPlanService, TreatmentPlanService>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
+            builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IAuthorizationHandler, OwnsVisitHandler>();
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -58,6 +67,7 @@ namespace DentalHealthSaaS
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
                     };
                 });
+            builder.Services.AddAppAuthorization();
 
             // Add AuditLogs saving service.
             builder.Services.AddScoped<AuditSaveChangesInterceptor>();

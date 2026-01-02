@@ -1,5 +1,7 @@
 ﻿using DentalHealthSaaS.Backend.src.Application.Abstractions.Patients;
 using DentalHealthSaaS.Backend.src.Application.DTOs.Patients;
+using DentalHealthSaaS.Backend.src.Application.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DentalHealthSaaS.Backend.src.Api.Controllers
@@ -16,18 +18,22 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
     {
         private readonly IPatientService _service = service;
 
+        [Authorize(Policy = Permissions.Patients_Read)]
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<PatientDto>>> GetAll() 
             => Ok(await _service.GetAllAsync());
 
+        [Authorize(Policy = Permissions.Patients_Read)]
         [HttpGet("/{id:guid}")]
         public async Task<ActionResult<PatientDto>> GetById(Guid id)
             => Ok(await _service.GetByIdAsync(id));
 
+        [Authorize(Policy = Permissions.Patients_Write)]
         [HttpPost]
         public async Task<IActionResult> Create(CreatePatientDto dto)
             => Ok(await _service.CreateAsync(dto));
 
+        [Authorize(Policy = Permissions.Patients_Write)]
         [HttpPut("/{id:guid}")]
         public async Task<IActionResult> Update(Guid id, UpdatePatientDto dto)
         {
@@ -36,6 +42,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = Permissions.Patients_Delete)]
         [HttpDelete("/{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {

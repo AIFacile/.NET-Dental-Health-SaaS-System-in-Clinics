@@ -26,7 +26,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Mappings
                 Id = Guid.NewGuid(),
                 PatientId = dto.PatientId,
                 DoctorId = dto.DoctorId,
-                Status = "Open",
+                Status = VisitStatus.Open,
                 VisitDate = dto.VisitDate,
                 VisitType = dto.VisitType,
                 Notes = dto.Notes,

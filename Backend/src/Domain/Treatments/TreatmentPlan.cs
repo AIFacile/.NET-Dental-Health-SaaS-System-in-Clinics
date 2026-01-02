@@ -13,7 +13,7 @@ namespace DentalHealthSaaS.Backend.src.Domain.Treatments
         public required string PlanType { get; set; }
 
         public decimal EstimatedCost { get; set; }
-        public string Status { get; set; } = "Draft";
+        public TreatmentPlanStatus Status { get; set; } = TreatmentPlanStatus.Draft;
 
         public ICollection<TreatmentStep> Steps { get; set; } = new List<TreatmentStep>();
     }

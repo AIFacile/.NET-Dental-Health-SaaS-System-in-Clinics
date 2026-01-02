@@ -12,7 +12,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         private readonly IAppointmentService _service = service;
 
         // POST /api/appointments
-        [HttpPost]
+        [HttpPost("/api/appointments")]
         public async Task<ActionResult<AppointmentDto>> Create(
             CreateAppointmentDto dto)
         {
@@ -31,7 +31,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             => Ok(await _service.GetByPatientAsync(patientId));
 
         // PUT /api/appointments/{id}
-        [HttpPut("{id:guid}")]
+        [HttpPut("/api/appointments/{id:guid}")]
         public async Task<IActionResult> Update(Guid id, UpdateAppointmentDto dto)
         {
             await _service.UpdateAsync(id, dto);
@@ -39,12 +39,12 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         // POST /api/appointments/{id}/check-in
-        [HttpPost("{id:guid}/check-in")]
+        [HttpPost("/api/appointments/{id:guid}/check-in")]
         public async Task<ActionResult<VisitDto>> CheckIn(Guid id)
             => Ok(await _service.CheckInAsync(id));
 
         // POST /api/appointments/{id}/cancel
-        [HttpPost("{id:guid}/cancel")]
+        [HttpPost("/api/appointments/{id:guid}/cancel")]
         public async Task<IActionResult> Cancel(Guid id)
         {
             await _service.CancelAsync(id);
@@ -52,7 +52,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         // POST /api/appointments/{id}/confirm
-        [HttpPost("{id:guid}/confirm")]
+        [HttpPost("/api/appointments/{id:guid}/confirm")]
         public async Task<ActionResult<VisitDto>> Confirm(Guid id)
         {
             await _service.ConfirmAsync(id);
@@ -60,7 +60,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         // POST /api/appointments/{id}/No-show
-        [HttpPost("{id:guid}/no-show")]
+        [HttpPost("/api/appointments/{id:guid}/no-show")]
         public async Task<ActionResult<VisitDto>> NoShow(Guid id)
         {
             await _service.NoShowAsync(id);
