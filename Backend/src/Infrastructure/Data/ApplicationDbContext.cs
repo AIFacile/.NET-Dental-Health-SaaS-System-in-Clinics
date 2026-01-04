@@ -11,6 +11,8 @@ using DentalHealthSaaS.Backend.src.Domain.Tenants;
 using DentalHealthSaaS.Backend.src.Domain.Treatments;
 using DentalHealthSaaS.Backend.src.Domain.Users;
 using DentalHealthSaaS.Backend.src.Domain.Visits;
+using DentalHealthSaaS.Backend.src.Infrastructure.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -365,8 +367,7 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
             // =========================
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = SeedConstants.RoleAdminId, Name = RoleName.SuperAdmin },
-                new Role { Id = SeedConstants.RoleDoctorId, Name = RoleName.Doctor },
-                new Role { Id = SeedConstants.RoleAssistantId, Name = RoleName.Assistant }
+                new Role { Id = SeedConstants.RoleDoctorId, Name = RoleName.Doctor }
             );
 
             // =========================
@@ -376,11 +377,23 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                 new User
                 {
                     Id = SeedConstants.AdminUserId,
-                    Username = "admin",
-                    RealName = "System Admin",
+                    Username = "SuperAdmin",
+                    RealName = "You Know Who",
                     Email = "admin@clinic.com",
-                    PasswordHash = new byte[] { 1, 2, 3 }, // Demo only
-                    PasswordSalt = new byte[] { 4, 5, 6 },
+                    // Password 123456
+                    PasswordHash = Convert.FromHexString(
+                        "1DC2AB34B210E11012B47155A2BDD42DEA" +
+                        "F5ED1EA44FF874F77BD2E4E3E63D4C5E8EA44" +
+                        "B9C83FD6C8C16A8E0E3F635DEC5403C7A7F09" +
+                        "F035BEE4FBA8373C95EA"),
+                    PasswordSalt = Convert.FromHexString(
+                        "976D3F96656EB44DFC42C03B0521ADC2AD4" +
+                        "D3F3D2301D2068333E41D2D88563296C15E5E" +
+                        "96DA88BC37A0ED95C990628837C5825DB10BF" +
+                        "73CE19CDFF1121267F38D4530E8CB2C94C5ED" +
+                        "53DF5A7220628D3C69EA771AFCBB241AFEFE6" +
+                        "F967EB5FE6672A7EA4AF46C726E9291E3721E" +
+                        "F46C61A4F7871870942CC5B6E7B658051836"),
                     IsActive = true,
                     TenantId = SeedConstants.Tenant1Id,
                     CreatedAt = new DateTime(2024, 1, 1),
@@ -394,8 +407,20 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                     Username = "dr.smith",
                     RealName = "Dr. John Smith",
                     Email = "dr.smith@clinic.com",
-                    PasswordHash = new byte[] { 7, 8, 9 },
-                    PasswordSalt = new byte[] { 10, 11, 12 },
+                    // Password 654321
+                    PasswordHash = Convert.FromHexString(
+                        "D7EE820CC731C4B520A418BAF2D1420E7E32" +
+                        "F2E0F824647C492768802E569011D6AFDDD05D" +
+                        "BE025E7394AD9293A6807145DB51C64020C8E8" +
+                        "C5D9463A98D7121F"),
+                    PasswordSalt = Convert.FromHexString(
+                        "F342F5720D538CA0BBB83326AA5DA1CDB1155" +
+                        "EB1BF629318CE2FD6340B5D1E9DAF8C64D9D354" +
+                        "8A4E8674BADB7BA26F7FCF050B5DE71CD4A63EF" +
+                        "8B6246E0010835CC59B73E09D52327F2C9DBEB7" +
+                        "99AB3F9E8AADEF202C71425E0583AA7C738A65C" +
+                        "6CDE7F86DD54F81A96782AA1FC6743F33295D64" +
+                        "571272B07D65371A3543BE2E"),
                     IsActive = true,
                     TenantId = SeedConstants.Tenant1Id,
                     CreatedAt = new DateTime(2024, 1, 1),
@@ -464,7 +489,7 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                 PatientId = SeedConstants.Patient1Id,
                 DiagnosisDate = new DateTime(2024, 1, 15),
                 DoctorId = SeedConstants.DoctorUserId,
-                Status = "Confirmed",
+                Status = DiagnosisStatus.Confirmed,
                 Summary = "Dental caries detected",
                 CreatedAt = new DateTime(2024, 1, 15),
                 CreatedBy = SeedConstants.DoctorUserId,

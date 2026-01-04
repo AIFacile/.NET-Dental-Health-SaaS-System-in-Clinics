@@ -15,16 +15,10 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
     /// It is intended to be registered with Entity Framework Core's change tracking pipeline to ensure consistent audit
     /// data across all changes. Thread safety is determined by the underlying contexts provided; ensure that
     /// IUserContext and ITenantContext are scoped appropriately for application's usage.</remarks>
-    public class AuditSaveChangesInterceptor : SaveChangesInterceptor
+    public class AuditSaveChangesInterceptor(IUserContext user, ITenantContext tenant) : SaveChangesInterceptor
     {
-        private readonly IUserContext _user;
-        private readonly ITenantContext _tenant;
-
-        public AuditSaveChangesInterceptor(IUserContext user, ITenantContext tenant) 
-        {
-            _user = user;
-            _tenant = tenant;
-        }
+        private readonly IUserContext _user = user;
+        private readonly ITenantContext _tenant = tenant;
 
         public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
         {
@@ -84,7 +78,6 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                     }
                 }
             }
-
 
             return base.SavingChanges(eventData, result);
         }

@@ -13,7 +13,7 @@ namespace DentalHealthSaaS.Backend.src.Domain.Diagnoses
         public DateTime DiagnosisDate { get; set; }
         public Guid DoctorId { get; set; }
 
-        public string Status { get; set; } = "Confirmed";
+        public DiagnosisStatus Status { get; set; } = DiagnosisStatus.Confirmed;
         public string? Summary { get; set; }
 
         public ICollection<DiagnosisItem> Items { get; set; } = new List<DiagnosisItem>();

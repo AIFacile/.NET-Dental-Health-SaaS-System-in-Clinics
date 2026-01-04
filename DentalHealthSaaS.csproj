@@ -10,6 +10,7 @@
     <Folder Include="Backend\tests\" />
     <Folder Include="Frontend\" />
     <Folder Include="Docs\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

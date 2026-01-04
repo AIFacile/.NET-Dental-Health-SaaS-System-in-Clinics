@@ -1,11 +1,15 @@
-﻿namespace DentalHealthSaaS.Backend.src.Application.Security
+﻿using System.Reflection;
+
+namespace DentalHealthSaaS.Backend.src.Application.Security
 {
     public static class Permissions
     {
         public static readonly IReadOnlyCollection<string> All =
             [.. typeof(Permissions)
-            .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
-            .Select(f => f.GetValue(null)!.ToString()!)];
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.IsLiteral && !f.IsInitOnly)
+            .Select(f => (string)f.GetRawConstantValue()!
+            .ToString()!)];
 
         // ===== Patient =====
         public const string Patients_Read = "patients.read";

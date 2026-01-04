@@ -17,7 +17,7 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Tenants
                 .User?
                 .HasClaim(c => c.Type == "tenant_id") == true;
 
-        public Guid TenantId { 
+        public Guid TenantId {
             get 
             {
                 return !HasTenant 

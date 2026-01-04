@@ -1,5 +1,7 @@
 ﻿using DentalHealthSaaS.Backend.src.Application.Abstractions.Diagnoses;
 using DentalHealthSaaS.Backend.src.Application.DTOs.Diagnoses;
+using DentalHealthSaaS.Backend.src.Application.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DentalHealthSaaS.Backend.src.Api.Controllers
@@ -9,18 +11,22 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
     // GET   /api/diagnoses/{id}
     // PUT   /api/diagnoses/{id}
     [ApiController]
+    [Authorize]
     public class DiagnosesController(IDiagnosisService service) : ControllerBase
     {
         private readonly IDiagnosisService _service = service;
 
+        [Authorize(Policy = Permissions.Diagnoses_Read)]
         [HttpGet("/api/patients/{patientId:guid}/diagnoses")]
         public async Task<ActionResult<IReadOnlyList<DiagnosisDto>>> GetAll(Guid patientId)
             => Ok(await _service.GetByPatientAsync(patientId));
 
+        [Authorize(Policy = Permissions.Diagnoses_Read)]
         [HttpGet("/api/diagnoses/{id:guid}")]
         public async Task<ActionResult<DiagnosisDto>> GetById(Guid id)
             => Ok(await _service.GetByIdAsync(id));
 
+        [Authorize(Policy = Permissions.Diagnoses_Write)]
         [HttpPost("/api/patients/{patientId}/diagnoses")]
         public async Task<IActionResult> Create(Guid patientId, CreateDiagnosisDto dto)
         {
@@ -29,6 +35,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = Permissions.Diagnoses_Write)]
         [HttpPut("/api/diagnoses/{id:guid}")]
         public async Task<IActionResult> Update(Guid id, UpdateDiagnosisDto dto)
         {

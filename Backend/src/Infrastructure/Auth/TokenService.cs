@@ -35,6 +35,11 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Auth
                 claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
             }
 
+            foreach (var permission in permissions)
+            {
+                claims.Add(new Claim("permissions", permission));
+            }
+
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
 

@@ -29,6 +29,8 @@ namespace DentalHealthSaaS
             // Add services to the container.
             builder.Services.AddControllers();
 
+            builder.Services.AddCors();
+
             builder.Services.AddAuthorization();
 
             builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
@@ -77,6 +79,9 @@ namespace DentalHealthSaaS
             // Configure the HTTP request pipeline.
 
             app.UseHttpsRedirection();
+
+            app.UseCors(x => x.AllowAnyMethod().AllowAnyHeader()
+            .WithOrigins("http://localhost:4200", "https://localhost:4200"));
 
             app.UseAuthentication();
 

@@ -1,4 +1,5 @@
 ﻿using DentalHealthSaaS.Backend.src.Application.DTOs.Auth;
+using DentalHealthSaaS.Backend.src.Domain.Users;
 using DentalHealthSaaS.Backend.src.Infrastructure.Auth;
 using DentalHealthSaaS.Backend.src.Infrastructure.Data;
 using Microsoft.AspNetCore.Authorization;
@@ -40,6 +41,44 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             {
                 AccessToken = token,
             });
+        }
+
+        [HttpPost("create-account")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateAccount(CreateAccountDto dto)
+        {
+            var tenant = await _db.Tenants.FirstOrDefaultAsync(t => t.Code == dto.TenantCode);
+
+            if (tenant == null) return NotFound("Tenant not found.");
+
+            PasswordHasher.CreatePasswordHash(dto.Password, out byte[] hash, out byte[] salt);
+
+            var user = new User
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenant.Id,
+                Username = dto.Username,
+                RealName = dto.RealName,
+                Email = dto.Email,
+                PasswordHash = hash,
+                PasswordSalt = salt,
+                IsActive = true,
+            };
+
+            var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == dto.ClaimedRole);
+            if (role == null) return NotFound("Claimed role name doesn't exist.");
+            var userRole = new UserRole
+            {
+                UserId = user.Id,
+                RoleId = role.Id,
+            };
+
+            _db.Users.Add(user);
+            _db.UserRoles.Add(userRole);
+
+            await _db.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
