@@ -1,3 +1,4 @@
+using DentalHealthSaaS.Backend.src.Application.Abstractions.Appointments;
 using DentalHealthSaaS.Backend.src.Application.Abstractions.Diagnoses;
 using DentalHealthSaaS.Backend.src.Application.Abstractions.HealthRecords;
 using DentalHealthSaaS.Backend.src.Application.Abstractions.Patients;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace DentalHealthSaaS
 {
@@ -27,7 +29,11 @@ namespace DentalHealthSaaS
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             builder.Services.AddCors();
 
@@ -47,6 +53,7 @@ namespace DentalHealthSaaS
             builder.Services.AddScoped<IUserContext, UserContext>();
             builder.Services.AddScoped<ITenantContext, TenantContext>();
             builder.Services.AddScoped<IPatientService, PatientService>();
+            builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IDiagnosisService, DiagnosisService>();
             builder.Services.AddScoped<IVisitService, VisitService>();
             builder.Services.AddScoped<ITreatmentPlanService, TreatmentPlanService>();

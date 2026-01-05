@@ -1,0 +1,224 @@
+<div class="flex h-screen bg-base-200">
+    <aside class="w-64 bg-base-100 shadow-xl flex flex-col">
+      <div class="p-6">
+        <h2 class="text-xl font-bold text-secondary flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" /></svg>
+          Reception Desk
+        </h2>
+      </div>
+  
+      <ul class="menu p-4 w-full grow text-base-content gap-2">
+        <li class="menu-title text-gray-400">Operations</li>
+        <li><a (click)="setSection('queue')" [class.active]="activeSection() === 'queue'">Today's Queue</a></li>
+        <li><a (click)="setSection('patients')" [class.active]="activeSection() === 'patients'">Patient Directory</a></li>
+        <li><a (click)="setSection('calendar')" [class.active]="activeSection() === 'calendar'">Scheduling</a></li>
+        
+        <div class="divider"></div>
+        
+        <li class="menu-title text-gray-400">Account</li>
+        <li><a (click)="auth.logout()" class="text-error font-semibold">Logout</a></li>
+      </ul>
+
+      <div class="p-4 border-t border-base-300">
+        <div class="flex items-center gap-3">
+          <div class="avatar placeholder">
+            <div class="bg-neutral text-neutral-content rounded-full w-10">
+              <span>{{ auth.currentUser()?.username?.substring(0,2) }}</span>
+            </div>
+          </div>
+          <div class="overflow-hidden">
+            <p class="font-bold text-sm truncate">{{ auth.currentUser()?.username }}</p>
+            <p class="text-xs opacity-50">{{ auth.currentUser()?.role }}</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+  
+    <main class="grow overflow-y-auto p-8">
+      <header class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold uppercase tracking-tight">Front Office</h1>
+          <p class="text-gray-500">Welcome, {{ auth.currentUser()?.username }}</p>
+        </div>
+        <button class="btn btn-primary" (click)="setSection('book-appointment')">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            Book Appointment
+          </button>
+        <button class="btn btn-secondary" (click)="setSection('add-patient')">
+          + Register New Patient
+        </button>
+      </header>
+
+      @if (activeSection() === 'add-patient') {
+        <div class="card bg-base-100 shadow-xl max-w-4xl mx-auto animate-fadeIn">
+          <div class="card-body">
+            <h2 class="card-title text-2xl mb-6">Patient Registration</h2>
+            <form [formGroup]="patientForm" (ngSubmit)="onSubmitPatient()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="form-control">
+                <label class="label"><span class="label-text">Patient Code *</span></label>
+                <input formControlName="patientCode" class="input input-bordered" placeholder="e.g. P-1001" />
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">Full Name *</span></label>
+                <input formControlName="name" class="input input-bordered" />
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">Gender *</span></label>
+                <select formControlName="gender" class="select select-bordered">
+                  <option>Male</option><option>Female</option><option>Other</option>
+                </select>
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">Birth Date *</span></label>
+                <input type="date" formControlName="birthDate" class="input input-bordered" />
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">Phone</span></label>
+                <input formControlName="phone" class="input input-bordered" />
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">Email</span></label>
+                <input type="email" formControlName="email" class="input input-bordered" />
+              </div>
+              <div class="form-control md:col-span-2">
+                <label class="label"><span class="label-text">Emergency Contact</span></label>
+                <input formControlName="emergencyContact" class="input input-bordered" placeholder="Name and Phone" />
+              </div>
+              <div class="md:col-span-2 mt-4 flex justify-end gap-2">
+                <button type="button" class="btn btn-ghost" (click)="setSection('patients')">Cancel</button>
+                <button type="submit" class="btn btn-secondary" [disabled]="patientForm.invalid">Save Patient</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+  
+      @if (activeSection() === 'book-appointment') {
+        <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto animate-fadeIn">
+          <div class="card-body">
+            <h2 class="card-title text-2xl mb-6 text-primary">Schedule New Appointment</h2>
+            <form [formGroup]="appointmentForm" (ngSubmit)="onSubmitAppointment()" class="space-y-4">
+              <div class="form-control">
+                <label class="label"><span class="label-text">Select Patient *</span></label>
+                <select formControlName="patientId" class="select select-bordered w-full">
+                  <option value="">-- Choose Patient --</option>
+                  @for (p of patients(); track p.id) {
+                    <option [value]="p.id">{{ p.name }} ({{ p.phone }})</option>
+                  }
+                </select>
+              </div>
+              <div class="form-control">
+                <label class="label"><span class="label-text">Assigned Doctor *</span></label>
+                <select formControlName="doctorId" class="select select-bordered w-full">
+                  <option value="">-- Choose Doctor --</option>
+                  @for (d of doctors(); track d.id) {
+                    <option [value]="d.id">{{ d.doctorName }}</option>
+                  }
+                </select>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="form-control">
+                  <label class="label"><span class="label-text">Start Time *</span></label>
+                  <input type="datetime-local" formControlName="startTime" class="input input-bordered" />
+                </div>
+                <div class="form-control">
+                  <label class="label"><span class="label-text">End Time *</span></label>
+                  <input type="datetime-local" formControlName="endTime" class="input input-bordered" />
+                </div>
+              </div>
+              <div class="pt-6 flex justify-end gap-2">
+                <button type="button" class="btn btn-ghost" (click)="setSection('queue')">Cancel</button>
+                <button type="submit" class="btn btn-primary" [disabled]="appointmentForm.invalid">Confirm Booking</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
+  
+      @if (activeSection() === 'queue') {
+        <div class="space-y-6 animate-fadeIn">
+          <div class="alert alert-info shadow-lg bg-white border-l-8 border-info">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <div>
+              <h3 class="font-bold">Operational Tip</h3>
+              <div class="text-xs">Mark patients as "Checked-In" once they arrive at the lobby.</div>
+            </div>
+          </div>
+  
+          <div class="card bg-base-100 shadow-xl border border-base-300">
+            <div class="card-body">
+              <h2 class="card-title mb-4">Current Queue</h2>
+              <table class="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="hover">
+                    <td class="font-mono">09:30</td>
+                    <td><span class="font-bold">Alice Johnson</span></td>
+                    <td>Dr. Smith</td>
+                    <td><span class="badge badge-warning">Waiting</span></td>
+                    <td class="flex gap-2">
+                      <button class="btn btn-xs btn-success text-white">Check-In</button>
+                      <button class="btn btn-xs btn-error text-white">No Show?</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      }
+  
+      @if (activeSection() === 'patients') {
+        <div class="card bg-base-100 shadow-xl p-6 animate-fadeIn">
+          <div class="flex justify-between mb-6">
+            <h2 class="text-2xl font-bold">Patient Directory</h2>
+            <div class="join">
+              <input class="input input-bordered join-item input-sm" placeholder="Search Patients..."/>
+              <button class="btn join-item btn-sm btn-primary">Search</button>
+            </div>
+          </div>
+  
+          <div class="overflow-x-auto">
+            <table class="table w-full">
+              <thead>
+                <tr>
+                  <th>Patient Name</th>
+                  <th>Gender</th>
+                  <th>Age</th>
+                  <th>Contact</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of patients(); track p.id) {
+                  <tr>
+                    <td>
+                      <div class="font-bold">{{ p.name }}</div>
+                    </td>
+                    <td>{{ p.gender }}</td>
+                    <td>{{ p.age }}</td>
+
+                    <td>{{ p.phone }}</td>
+                    <td>
+                      <div class="flex gap-2">
+                        <button class="btn btn-ghost btn-xs text-info">Edit</button>
+                        <button class="btn btn-ghost btn-xs text-error">Delete</button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    </main>
+  </div>

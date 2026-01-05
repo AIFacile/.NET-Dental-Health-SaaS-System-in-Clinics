@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth-service';
+import { RoleName } from '../../../types/auth-types';
 
 @Component({
   selector: 'app-login',
@@ -38,14 +39,21 @@ export class LoginComponent {
     this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
         this.isLoading = false;
-        console.log('Login successful', res);
-        this.router.navigate(['/doctor-dashboard']); 
+        const role = this.authService.currentUser()?.role;
+
+        if (role === RoleName.Receptionist) {
+          this.router.navigate(['/receptionist-dashboard']);
+        } else if (role === RoleName.Doctor) {
+          this.router.navigate(['/doctor-dashboard']);
+        } else {
+          this.router.navigate(['/dashboard']); // Default
+        }
       },
       error: (err) => {
         this.isLoading = false;
         // Handle specific error messages from backend or generic one
-        this.errorMessage = err.status === 401 
-          ? 'Invalid Clinic Code, Username or Password.' 
+        this.errorMessage = err.status === 401
+          ? 'Invalid Clinic Code, Username or Password.'
           : 'A connection error occurred. Please try again later.';
       }
     });

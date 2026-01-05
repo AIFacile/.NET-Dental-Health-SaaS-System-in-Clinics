@@ -1,9 +1,12 @@
-﻿using DentalHealthSaaS.Backend.src.Domain.Common;
+﻿using DentalHealthSaaS.Backend.src.Domain.Appointments;
+using DentalHealthSaaS.Backend.src.Domain.Common;
 using DentalHealthSaaS.Backend.src.Domain.Diagnoses;
 using DentalHealthSaaS.Backend.src.Domain.HealthRecords;
 using DentalHealthSaaS.Backend.src.Domain.OralXrayImages;
 using DentalHealthSaaS.Backend.src.Domain.Patients;
+using DentalHealthSaaS.Backend.src.Domain.Payments;
 using DentalHealthSaaS.Backend.src.Domain.Treatments;
+using DentalHealthSaaS.Backend.src.Domain.Users;
 
 namespace DentalHealthSaaS.Backend.src.Domain.Visits
 {
@@ -17,6 +20,10 @@ namespace DentalHealthSaaS.Backend.src.Domain.Visits
         public VisitStatus Status { get; set; } = VisitStatus.Open;
 
         public Guid DoctorId { get; set; }
+        public User Doctor { get; set; } = null!;
+
+        public Guid? AppointmentId { get; set; }
+        public Appointment Appointment { get; set; } = null!;
 
         public string? Notes { get; set; }
 
@@ -24,5 +31,6 @@ namespace DentalHealthSaaS.Backend.src.Domain.Visits
         public ICollection<TreatmentPlan> TreatmentPlans { get; set; } = new List<TreatmentPlan>();
         public ICollection<HealthRecord> HealthRecords { get; set; } = new List<HealthRecord>();
         public ICollection<OralXrayImage> OralXrayImages { get; set; } = new List<OralXrayImage>();
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

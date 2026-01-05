@@ -1,4 +1,5 @@
 ﻿using DentalHealthSaaS.Backend.src.Domain.Common;
+using DentalHealthSaaS.Backend.src.Domain.Patients;
 using DentalHealthSaaS.Backend.src.Domain.Visits;
 
 namespace DentalHealthSaaS.Backend.src.Domain.OralXrayImages
@@ -9,6 +10,7 @@ namespace DentalHealthSaaS.Backend.src.Domain.OralXrayImages
         public Visit Visit { get; set; } = null!;
 
         public Guid PatientId { get; set; }
+        public Patient Patient { get; set; } = null!;
 
         public required string ImageType { get; set; }
         public required string ImageUrl { get; set; }

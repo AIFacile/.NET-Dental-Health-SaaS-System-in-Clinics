@@ -84,9 +84,13 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
             ConfigureVisit(modelBuilder);
             ConfigureDiagnosis(modelBuilder);
             ConfigureTreatment(modelBuilder);
+            ConfigureAppointment(modelBuilder);
+            ConfigureHealthRecord(modelBuilder);
+            ConfigureOralXrayImage(modelBuilder);
+            ConfigurePayment(modelBuilder);
             ConfigureOthers(modelBuilder);
 
-            SeedData(modelBuilder);
+            // SeedData(modelBuilder);
 
         }
 
@@ -242,6 +246,16 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
                       .WithMany(x => x.Visits)
                       .HasForeignKey(x => x.PatientId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.Doctor)
+                      .WithMany()
+                      .HasForeignKey(x => x.DoctorId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(v => v.Appointment)
+                      .WithOne()
+                      .HasForeignKey<Visit>(v => v.AppointmentId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
         }
 
@@ -304,33 +318,110 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Data
         }
 
         // ----------------------------------------------------
-        // Other entities
+        // Appointment
         // ----------------------------------------------------
-        private static void ConfigureOthers(ModelBuilder modelBuilder)
+        public static void ConfigureAppointment(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Appointment>(entity =>
+            {
+                entity.HasKey(x => x.Id);
+            });
+
+            // Appointment → Patient
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Patient)
+                .WithMany()
+                .HasForeignKey(a => a.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Appointment → Doctor
+            modelBuilder.Entity<Appointment>()
+                .HasOne(a => a.Doctor)
+                .WithMany()
+                .HasForeignKey(a => a.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        // ----------------------------------------------------
+        // HealthRecord
+        // ----------------------------------------------------
+        public static void ConfigureHealthRecord(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<HealthRecord>(entity =>
             {
                 entity.HasKey(x => x.Id);
             });
 
+            // HealthRecord → Patient
+            modelBuilder.Entity<HealthRecord>()
+                .HasOne(a => a.Patient)
+                .WithMany()
+                .HasForeignKey(a => a.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // HealthRecord → Visit
+            modelBuilder.Entity<HealthRecord>()
+                .HasOne(a => a.Visit)
+                .WithMany(v => v.HealthRecords)
+                .HasForeignKey(a => a.VisitId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        // ----------------------------------------------------
+        // OralXrayImage
+        // ----------------------------------------------------
+        public static void ConfigureOralXrayImage(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<OralXrayImage>(entity =>
             {
                 entity.HasKey(x => x.Id);
             });
 
-            modelBuilder.Entity<Appointment>(entity =>
-            {
-                entity.HasKey(x => x.Id);
-            });
+            // HealthRecord → Patient
+            modelBuilder.Entity<OralXrayImage>()
+                .HasOne(a => a.Patient)
+                .WithMany()
+                .HasForeignKey(a => a.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // HealthRecord → Visit
+            modelBuilder.Entity<OralXrayImage>()
+                .HasOne(a => a.Visit)
+                .WithMany(v => v.OralXrayImages)
+                .HasForeignKey(a => a.VisitId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        // ----------------------------------------------------
+        // Payment
+        // ----------------------------------------------------
+        public static void ConfigurePayment(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<Payment>(entity =>
             {
                 entity.HasKey(x => x.Id);
-
-                entity.Property(x => x.Amount)
-                      .HasPrecision(18, 2);
             });
 
+            // HealthRecord → Patient
+            modelBuilder.Entity<Payment>()
+                .HasOne(a => a.Patient)
+                .WithMany()
+                .HasForeignKey(a => a.PatientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // HealthRecord → Visit
+            modelBuilder.Entity<Payment>()
+                .HasOne(a => a.Visit)
+                .WithMany(v => v.Payments)
+                .HasForeignKey(a => a.VisitId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
+        // ----------------------------------------------------
+        // Other entities
+        // ----------------------------------------------------
+        private static void ConfigureOthers(ModelBuilder modelBuilder)
+        {
             modelBuilder.Entity<AuditLog>(entity =>
             {
                 entity.HasKey(x => x.Id);

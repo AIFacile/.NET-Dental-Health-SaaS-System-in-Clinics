@@ -10,11 +10,14 @@ namespace DentalHealthSaaS.Backend.src.Application.Mappings
             return new AppointmentDto
             {
                 PatientId = appointment.PatientId,
+                PatientName = appointment.Patient.Name,
                 DoctorId = appointment.DoctorId,
+                DoctorName = appointment.Doctor.RealName,
                 StartTime = appointment.StartTime,
                 EndTime = appointment.EndTime,
                 Status = appointment.Status,
                 VisitId = appointment.VisitId,
+                Visit = appointment.Visit,
             };
         }
     }

@@ -30,6 +30,8 @@ namespace DentalHealthSaaS.Backend.src.Application.Security
             Permissions.Visits_Write,
             Permissions.Diagnoses_Read,
             Permissions.Diagnoses_Write,
+            Permissions.Appointments_Read,
+            Permissions.Appointments_Write,
             Permissions.TreatmentPlans_Read,
             Permissions.TreatmentPlans_Write,
             Permissions.HealthRecords_Read,

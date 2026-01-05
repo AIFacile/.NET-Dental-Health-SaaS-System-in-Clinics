@@ -9,6 +9,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
     {
         private readonly IVisitService _service = service;
 
+        // ********************** SuperAdmin Only ********************** //
         [HttpPost("/api/visits")]
         public async Task<ActionResult<VisitDto>> Create(
             CreateVisitDto dto)
@@ -26,6 +27,15 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         // GET /api/patients/{patientId}/visits
         [HttpGet("/api/patients/{patientId:guid}/visits")]
         public async Task<ActionResult<IReadOnlyList<VisitDto>>> GetByPatientsId(Guid patientId)
+            => Ok(await _service.GetByPatientsAsync(patientId));
+        // ************************************************************* //
+
+        // ------------------------- Doctors --------------------------- //
+        // GET /api/me/appointments/{patientId:guid}/visits
+        // This API is for doctors to inspect a patient's visits.
+        // The root page should be doctor's appointment list.
+        [HttpGet("/api/me/appointments/{patientId:guid}/visits")]
+        public async Task<ActionResult<IReadOnlyList<VisitDto>>> GetByPatientIdInAppointment(Guid patientId)
             => Ok(await _service.GetByPatientsAsync(patientId));
 
         // POST /api/visits/{id}/start-diagnosis
@@ -52,12 +62,13 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             return Ok();
         }
 
-        // POST /api/visits/{id}/complete
+        // POST /api/visits/{id}/cancel
         [HttpPost("/api/visits/{id:guid}/cancel")]
         public async Task<IActionResult> Cancel(Guid id)
         {
             await _service.CancelAsync(id);
             return Ok();
         }
+        // ------------------------------------------------------------- //
     }
 }

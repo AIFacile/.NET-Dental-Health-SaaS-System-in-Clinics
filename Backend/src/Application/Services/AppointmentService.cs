@@ -1,4 +1,5 @@
 ﻿using DentalHealthSaaS.Backend.src.Application.Abstractions.Appointments;
+using DentalHealthSaaS.Backend.src.Application.Abstractions.Security;
 using DentalHealthSaaS.Backend.src.Application.DTOs.Appointments;
 using DentalHealthSaaS.Backend.src.Application.DTOs.Visits;
 using DentalHealthSaaS.Backend.src.Application.Mappings;
@@ -9,9 +10,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DentalHealthSaaS.Backend.src.Application.Services
 {
-    public class AppointmentService(ApplicationDbContext db) : IAppointmentService
+    public class AppointmentService(ApplicationDbContext db, IUserContext user) : IAppointmentService
     {
         private readonly ApplicationDbContext _db = db;
+        private readonly IUserContext _user = user;
 
         public async Task<AppointmentDto> CreateAsync(CreateAppointmentDto dto)
         {
@@ -52,16 +54,37 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
             return appointment.ToDto();
         }
 
-        public async Task<IReadOnlyList<AppointmentDto>> GetByDoctorAsync(Guid doctorId)
+        public async Task<IReadOnlyList<AppointmentDto>> GetByDoctorAsync()
         {
-            var appointmentExists = await _db.Appointments
-                .AnyAsync(a => a.DoctorId == doctorId);
-            if (!appointmentExists) 
-                throw new Exception("The patient has no appointment or doesn't exist");
+            var doctorId = _user.UserId;
 
             return await _db.Appointments
-                .Where(a => a.DoctorId == doctorId)
                 .AsNoTracking()
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Where(a => a.DoctorId == doctorId)
+                .Select(a => a.ToDto())
+                .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<AppointmentDto>> GetByDoctorTodayAsync()
+        {
+            var doctorId = _user.UserId;
+            var todayStart = DateTime.Today;
+            var tomorrowStart = todayStart.AddDays(1);
+
+            return await _db.Appointments
+                .AsNoTracking()
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Where(a =>
+                    a.DoctorId == doctorId &&
+                    a.StartTime >= todayStart &&
+                    a.StartTime < tomorrowStart &&
+                    a.Status == AppointmentStatus.Scheduled &&
+                    a.Status != AppointmentStatus.Cancelled
+                )
+                .OrderBy(a => a.StartTime)
                 .Select(a => a.ToDto())
                 .ToListAsync();
         }
@@ -72,8 +95,30 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 .AnyAsync(a => a.PatientId == patientId);
 
             return await _db.Appointments
-                .Where(a => a.PatientId == patientId)
                 .AsNoTracking()
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Where(a => a.PatientId == patientId)
+                .Select(a => a.ToDto())
+                .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<AppointmentDto>> GetTodayAsync()
+        {
+            var todayStart = DateTime.Today;
+            var tomorrowStart = todayStart.AddDays(1);
+
+            return await _db.Appointments
+                .AsNoTracking()
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
+                .Where(a =>
+                    a.StartTime >= todayStart &&
+                    a.StartTime < tomorrowStart &&
+                    a.Status == AppointmentStatus.Confirmed &&
+                    a.Status != AppointmentStatus.Cancelled
+                )
+                .OrderBy(a => a.StartTime)
                 .Select(a => a.ToDto())
                 .ToListAsync();
         }
@@ -105,10 +150,10 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
             await _db.SaveChangesAsync();
         }
 
-        public async Task CancelAsync(Guid id)
+        public async Task CancelAsync(Guid appointmentId)
         {
             var appointment = await _db.Appointments
-                .FirstOrDefaultAsync(a => a.Id == id)
+                .FirstOrDefaultAsync(a => a.Id == appointmentId)
                 ?? throw new Exception("Appointment doesn't exist");
 
             if (appointment.IsDeleted is true ||
@@ -138,7 +183,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 Status = VisitStatus.Open
             };
 
-            appointment.Status = AppointmentStatus.Completed;
+            appointment.Status = AppointmentStatus.CheckedIn;
             appointment.VisitId = visit.Id;
 
             _db.Visits.Add(visit);
@@ -153,10 +198,24 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 .FirstOrDefaultAsync(a => a.Id == appointmentId)
                 ?? throw new Exception("Appointment doesn't exist.");
 
-            if (appointment.Status != AppointmentStatus.CheckedIn)
-                throw new Exception("Appointment hasn't been checked-in.");
+            if (appointment.Status != AppointmentStatus.Scheduled)
+                throw new Exception("Appointment is not scheduled.");
             
             appointment.Status = AppointmentStatus.Confirmed;
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task CompleteAsync(Guid appointmentId)
+        {
+            var appointment = await _db.Appointments
+                .FirstOrDefaultAsync(a => a.Id == appointmentId)
+                ?? throw new Exception("Appointment doesn't exist.");
+
+            if (appointment.Status != AppointmentStatus.CheckedIn)
+                throw new Exception("Appointment hasn't been checked-in.");
+
+            appointment.Status = AppointmentStatus.Completed;
 
             await _db.SaveChangesAsync();
         }

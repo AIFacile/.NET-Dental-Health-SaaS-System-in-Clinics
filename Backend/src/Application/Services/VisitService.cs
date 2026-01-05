@@ -11,7 +11,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
     {
         private readonly ApplicationDbContext _db = db;
 
-        async Task IVisitService.CancelAsync(Guid visitId)
+        public async Task CancelAsync(Guid visitId)
         {
             var visit = await GetVisitOrThrow(visitId);
 
@@ -22,7 +22,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
             await _db.SaveChangesAsync();
         }
 
-        async Task IVisitService.CompleteAsync(Guid visitId)
+        public async Task CompleteAsync(Guid visitId)
         {
             var visit = await GetVisitOrThrow(visitId);
 

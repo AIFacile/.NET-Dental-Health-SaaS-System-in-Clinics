@@ -45,7 +45,10 @@ export class AuthService {
     };
 
     this.currentUser.set(user);
+    
     localStorage.setItem('id_token', token);
+    localStorage.setItem('user_name', user.username);
+    localStorage.setItem('role', user.role);
   }
 
   hasPermission(permission: string): boolean {
@@ -60,6 +63,7 @@ export class AuthService {
     localStorage.removeItem('id_token');
     localStorage.removeItem('user_name');
     localStorage.removeItem('role');
+    localStorage.removeItem('user');
 
     this.currentUser.set(null);
 

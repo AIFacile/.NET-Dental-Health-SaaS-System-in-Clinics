@@ -44,7 +44,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         [HttpPost("create-account")]
-        [AllowAnonymous]
+        [AllowAnonymous] // only for development
         public async Task<IActionResult> CreateAccount(CreateAccountDto dto)
         {
             var tenant = await _db.Tenants.FirstOrDefaultAsync(t => t.Code == dto.TenantCode);
@@ -75,6 +75,28 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
 
             _db.Users.Add(user);
             _db.UserRoles.Add(userRole);
+
+            await _db.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPost("add-role")]
+        [AllowAnonymous] // only for development
+        public async Task <IActionResult> AddRole([FromBody] RoleName roleName)
+        {
+            var roleNameExists = await _db.Roles.AnyAsync(r => r.Name == roleName);
+
+            if (roleNameExists)
+            {
+                throw new Exception("Role exists.");
+            }
+
+            _db.Roles.Add(new Role
+            {
+                Id = Guid.NewGuid(),
+                Name = roleName
+            });
 
             await _db.SaveChangesAsync();
 

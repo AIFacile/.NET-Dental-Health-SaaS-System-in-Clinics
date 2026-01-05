@@ -1,0 +1,353 @@
+<div class="flex h-screen bg-base-200">
+  <aside class="w-64 bg-base-100 shadow-xl flex flex-col">
+    <div class="p-6">
+      <h2 class="text-xl font-bold text-primary flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-7h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+        Consulting Room
+      </h2>
+    </div>
+
+    <ul class="menu p-4 w-full grow text-base-content gap-2">
+      <li class="menu-title text-gray-400">Operations</li>
+      <li>
+        <a (click)="setSection('today')" [class.active]="activeSection() === 'today'">
+          Patients Today
+        </a>
+      </li>
+      <li>
+        <a (click)="setSection('patients')" [class.active]="activeSection() === 'patients'">
+          All Appointments
+        </a>
+      </li>
+      <li>
+        <a (click)="setSection('calendar')" [class.active]="activeSection() === 'calendar'">
+          Calendar
+        </a>
+      </li>
+
+      <div class="divider"></div>
+
+      <li class="menu-title text-gray-400">Account</li>
+      <li>
+        <a (click)="setSection('settings')" [class.active]="activeSection() === 'settings'">
+          Settings
+        </a>
+      </li>
+      <li>
+        <a (click)="auth.logout()" class="text-error font-semibold">Logout</a>
+      </li>
+    </ul>
+
+    <div class="p-4 border-t border-base-300">
+      <div class="flex items-center gap-3">
+        <div class="avatar placeholder">
+          <div class="bg-neutral text-neutral-content rounded-full w-10">
+            <span>{{ auth.currentUser()?.username?.substring(0,2) }}</span>
+          </div>
+        </div>
+        <div class="overflow-hidden">
+          <p class="font-bold text-sm truncate">{{ auth.currentUser()?.username }}</p>
+          <p class="text-xs opacity-50">{{ auth.currentUser()?.role }}</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="grow overflow-y-auto p-8">
+    
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold">WORKBENCH</h1>
+        <p class="text-gray-500">Welcome back, {{ auth.currentUser()?.username }}</p>
+      </div>
+      <!-- <div class="badge badge-accent p-4 font-semibold uppercase tracking-wider">
+        Clinic: {{ auth.currentUser()?.tenantId?.substring(0,8) }}
+      </div> -->
+    </header>
+
+    <div class="animate-fadeIn">
+      @if (activeSection() === 'today') {
+        <div class="space-y-6 animate-fadeIn">
+          
+          <div class="stats shadow bg-base-100 w-full border border-base-300">
+            <div class="stat">
+              <div class="stat-title text-slate-500">Today's Appointments</div>
+              <div class="stat-value text-primary">{{ todayAppointments().length }}</div>
+              <div class="stat-desc">Scheduled for your shift</div>
+            </div>
+            <div class="stat">
+              <div class="stat-title">Remaining</div>
+              <div class="stat-value text-secondary">
+                {{ todayAppointments().length > 0 ? todayAppointments().length - 1 : 0 }}
+              </div>
+              <div class="stat-desc">Patients left to see</div>
+            </div>
+            <div class="stat">
+              <div class="stat-title text-slate-500">Status</div>
+              <div class="stat-value text-sm">
+                <span class="badge badge-outline" [class.badge-success]="todayAppointments().length === 0">
+                  {{ todayAppointments().length === 0 ? 'All Clear' : 'Busy' }}
+                </span>
+              </div>
+            </div>
+          </div>
+      
+          <div class="card bg-base-100 shadow-xl border border-base-300 min-h-100">
+            <div class="card-body">
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="card-title text-xl font-bold">Schedule for Today</h2>
+                <button (click)="loadAllData()" class="btn btn-ghost btn-sm" [disabled]="isLoading()">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" [class.animate-spin]="isLoading()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Sync Schedule
+                </button>
+              </div>
+      
+              <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                  @if (todayAppointments().length > 0) {
+                    <thead class="bg-base-200">
+                      <tr>
+                        <th class="w-16">No.</th>
+                        <th>Patient</th>
+                        <th>Time Slot</th>
+                        <th>Status</th>
+                        <th class="text-right">Actions</th>
+                      </tr>
+                    </thead>
+                  }
+                  
+                  <tbody>
+                    @for (apt of todayAppointments(); track apt.startTime; let i = $index) {
+                      <tr class="hover group">
+                        <th class="opacity-50 font-mono">{{ i + 1 }}</th>
+                        <td>
+                          <div class="font-bold text-primary">{{ apt.patientName || 'N/A' }}</div>
+                          <div class="text-xs opacity-50">PID: {{ apt.patientId.substring(0,8) }}</div>
+                        </td>
+                        <td>
+                          <span class="badge badge-ghost font-medium">
+                            {{ formatTimeRange(apt.startTime, apt.endTime) }}
+                          </span>
+                        </td>
+                        <td>
+                          <div [class]="'badge badge-sm ' + getStatusBadgeClass(apt.status)">
+                            {{ apt.status }}
+                          </div>
+                        </td>
+                        <td class="text-right">
+                          <div class="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="btn btn-xs btn-success text-white">Confirm</button>
+                            <button class="btn btn-xs btn-outline btn-error">Cancel</button>
+                            <button class="btn btn-xs btn-primary">View Details</button>
+                          </div>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="5">
+                          <div class="hero py-20">
+                            <div class="hero-content text-center">
+                              <div class="max-w-md">
+                                <div class="bg-base-200 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                </div>
+                                <h3 class="text-2xl font-bold">No Patients Today</h3>
+                                <p class="py-4 text-slate-500">
+                                  Your schedule is currently empty for today. New appointments will appear here as they are booked.
+                                </p>
+                                <button (click)="setSection('calendar')" class="btn btn-outline btn-primary btn-sm">Check Monthly Calendar</button>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <div class="card bg-base-100 shadow-xl p-8">
+      @if (activeSection() === 'patients') {
+        <div class="space-y-6 animate-fadeIn">
+          <div class="flex justify-between items-end">
+            <div>
+              <h2 class="text-3xl font-bold text-slate-800">Your Appointments</h2>
+              <p class="text-slate-500 mt-1">Full clinical history of your patient engagements.</p>
+            </div>
+            <div class="badge badge-outline gap-2 p-4">
+              Total Records: {{ allAppointments().length }}
+            </div>
+          </div>
+      
+          <div class="card bg-base-100 shadow-xl border border-base-300">
+            <div class="card-body p-0"> <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                  <thead class="bg-base-200">
+                    <tr>
+                      <th class="w-16">No.</th>
+                      <th>Patient Name</th>
+                      <th>Full Date & Time Slot</th>
+                      <th>Status</th>
+                      <th class="text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (apt of allAppointments(); track apt.startTime; let i = $index) {
+                      <tr class="hover group">
+                        <th class="opacity-50 font-mono">{{ i + 1 }}</th>
+                        <td>
+                          <div class="font-bold text-primary">{{ apt.patientName }}</div>
+                          <!-- <div class="text-[10px] opacity-40 font-mono uppercase">ID: {{ apt. }}</div> -->
+                        </td>
+                        <td>
+                          <div class="flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="font-medium text-slate-600">
+                              {{ formatFullDateTime(apt.startTime, apt.endTime) }}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div [class]="'badge badge-sm font-semibold ' + getStatusBadgeClass(apt.status)">
+                            {{ apt.status }}
+                          </div>
+                        </td>
+                        <td class="text-right">
+                          <div class="flex justify-end gap-2">
+                            <button class="btn btn-xs btn-primary">
+                              View Visits
+                            </button>
+                            <button class="btn btn-xs btn-ghost btn-square" title="Patient Chart">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="5" class="text-center py-20">
+                          <div class="flex flex-col items-center opacity-30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <span class="text-xl font-bold">No appointment records found.</span>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="p-4 bg-base-200/50 flex justify-center">
+                <div class="join">
+                  <button class="join-item btn btn-sm">1</button>
+                  <button class="join-item btn btn-sm btn-disabled">...</button>
+                </div>
+              </div>
+      
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (activeSection() === 'calendar') {
+      <div class="space-y-6 animate-fadeIn">
+        <div class="flex flex-col md:flex-row justify-between items-center bg-base-100 p-6 rounded-box shadow-sm border border-base-300 gap-4">
+          <div>
+            <h2 class="text-3xl font-bold text-primary">
+              {{ viewDate() | date: 'MMMM yyyy' }}
+            </h2>
+            <p class="text-slate-500">Manage your monthly schedule and availability</p>
+          </div>
+    
+          <div class="join border border-base-300">
+            <div class="join border border-base-300">
+              <button 
+                type="button"
+                class="join-item btn btn-outline btn-sm" 
+                (click)="changeMonth(-1)">
+                « Prev
+              </button>
+              
+              <button 
+                type="button"
+                class="join-item btn btn-outline btn-sm" 
+                (click)="setToday()">
+                Today
+              </button>
+              
+              <button 
+                type="button"
+                class="join-item btn btn-outline btn-sm" 
+                (click)="changeMonth(1)">
+                Next »
+              </button>
+            </div>
+          </div>
+        </div>
+    
+        <div class="card bg-base-100 shadow-xl border border-base-300 overflow-hidden">
+          <div class="grid grid-cols-7 bg-base-200 border-b border-base-300">
+            @for (dayName of daysOfWeek; track dayName) {
+              <div class="py-3 text-center text-xs font-bold uppercase tracking-widest text-slate-500">
+                {{ dayName }}
+              </div>
+            }
+          </div>
+    
+          <div class="grid grid-cols-7 divide-x divide-y divide-base-300">
+            @for (item of calendarDays(); track $index) {
+              <div class="min-h-30 p-2 bg-base-100 hover:bg-base-200 transition-colors group relative">
+                
+                @if (item.day) {
+                  <div class="flex justify-between items-start">
+                    <span [class]="'flex items-center justify-center w-8 h-8 text-sm font-semibold rounded-full ' + 
+                      (item.isToday ? 'bg-primary text-white shadow-lg' : 'text-slate-600')">
+                      {{ item.day }}
+                    </span>
+                    
+                    @if (item.day % 3 === 0) {
+                      <div class="badge badge-xs badge-info"></div>
+                    }
+                  </div>
+    
+                  <div class="mt-2 space-y-1">
+                    @if (item.day === 15) {
+                      <div class="text-[10px] p-1 bg-success/10 text-success rounded border border-success/20 truncate">
+                        Staff Meeting
+                      </div>
+                    }
+                    @if (item.day % 5 === 0) {
+                      <div class="text-[10px] p-1 bg-primary/10 text-primary rounded border border-primary/20 truncate">
+                        3 Patients
+                      </div>
+                    }
+                  </div>
+    
+                  <button class="absolute bottom-2 right-2 btn btn-ghost btn-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                    + Add
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+  </main>
+</div>
