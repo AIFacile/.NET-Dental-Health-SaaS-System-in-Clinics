@@ -15,4 +15,8 @@ export class AppointmentService {
   getAllAppointments(): Observable<AppointmentDto[]> {
     return this.http.get<AppointmentDto[]>(this.API_URL);
   }
+
+  confirm(id: string): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/${id}/confirm`, {});
+  }
 }

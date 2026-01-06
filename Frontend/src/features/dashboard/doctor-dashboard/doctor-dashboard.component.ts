@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { Observable } from 'rxjs';
 import { AppointmentService } from '../../../core/services/appointment-service';
@@ -14,6 +15,7 @@ import { AppointmentDto } from '../../../types/appointment-types';
 })
 export class DoctorDashboardComponent implements OnInit {
   public auth = inject(AuthService);
+  public router = inject(Router);
   private appointmentService = inject(AppointmentService);
 
   activeSection = signal<string>('today');
@@ -37,6 +39,27 @@ export class DoctorDashboardComponent implements OnInit {
       error: () => this.isLoading.set(false)
     });
   }
+
+  onConfirm(appointmentId: string) {
+    if (confirm('Make sure you have availability to confirm patient arrival.')) {
+      this.appointmentService.confirm(appointmentId).subscribe({
+        next: (response) => {
+          alert('Patient checked in successfully. Clinical record created.');
+          this.loadAllData();
+        },
+        error: (err) => alert('Confirmation failed: ' + err.message)
+      });
+    }
+  }
+
+  startConsultation(patientId: string, visitId?: string) {
+    // 如果没有 visitId (尚未 Check-in)，可以先调用 createVisit API，然后再跳转
+    if (!visitId) {
+       alert("Patient hasn't checked in yet.");
+       return;
+    }
+    this.router.navigate(['/doctor/consultation', patientId, visitId]);
+ }
 
   setSection(section: string) {
     this.activeSection.set(section);
@@ -80,23 +103,6 @@ export class DoctorDashboardComponent implements OnInit {
       default: return 'badge-ghost';
     }
   }
-
-  // // Helper to get text labels for status
-  // getStatusLabel(status: any): string {
-  //   // 将 status 强制转换为数字。即使后端传回的是字符串 "0"，Number("0") 也会变成数字 0
-  //   const statusKey = Number(status) as AppointmentStatus;
-  
-  //   const statusMap: Record<number, string> = {
-  //     [AppointmentStatus.Scheduled]: 'Scheduled',
-  //     [AppointmentStatus.Confirmed]: 'Confirmed',
-  //     [AppointmentStatus.CheckedIn]: 'Checked-In',
-  //     [AppointmentStatus.Cancelled]: 'Cancelled',
-  //     [AppointmentStatus.Completed]: 'Completed',
-  //     [AppointmentStatus.Noshow]: 'No Show'
-  //   };
-  
-  //   return statusMap[statusKey] || `Unknown (${status})`;
-  // }
 
   // Calendar State
   viewDate = signal<Date>(new Date());

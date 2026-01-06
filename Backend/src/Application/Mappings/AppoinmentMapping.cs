@@ -9,6 +9,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Mappings
         {
             return new AppointmentDto
             {
+                Id = appointment.Id,
                 PatientId = appointment.PatientId,
                 PatientName = appointment.Patient.Name,
                 DoctorId = appointment.DoctorId,

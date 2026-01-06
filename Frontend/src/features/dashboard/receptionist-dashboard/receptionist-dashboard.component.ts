@@ -97,7 +97,41 @@ export class ReceptionistDashboardComponent implements OnInit {
     }
   }
 
+  onCheckIn(appointmentId: string) {
+    if (confirm('Confirm patient arrival and start clinical visit?')) {
+      this.receptionistService.checkIn(appointmentId).subscribe({
+        next: (response) => {
+          alert('Patient checked in successfully. Clinical record created.');
+          this.loadAllData();
+        },
+        error: (err) => alert('Check-in failed: ' + err.message)
+      });
+    }
+  }
+
+  onNoShow(appointmentId: string) {
+    if (confirm('Mark this appointment as No-Show?')) {
+      this.receptionistService.markNoShow(appointmentId).subscribe({
+        next: () => {
+          this.loadAllData();
+        }
+      });
+    }
+  }
+
   setSection(section: string) {
     this.activeSection.set(section);
+  }
+
+  getStatusBadgeClass(status: any): string {
+    switch (status) {
+      case 'Scheduled': return 'badge-info';
+      case 'Confirmed': return 'badge-success';
+      case 'CheckedIn': return 'badge-primary';
+      case 'Cancelled': return 'badge-error';
+      case 'Completed': return 'badge-neutral';
+      case 'Noshow': return 'badge-ghost';
+      default: return 'badge-ghost';
+    }
   }
 }

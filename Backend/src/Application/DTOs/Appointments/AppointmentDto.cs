@@ -5,6 +5,7 @@ namespace DentalHealthSaaS.Backend.src.Application.DTOs.Appointments
 {
     public class AppointmentDto
     {
+        public Guid Id { get; set; }
         public Guid PatientId { get; set; }
         public string PatientName { get; set; } = null!;
         public Guid DoctorId { get; set; }

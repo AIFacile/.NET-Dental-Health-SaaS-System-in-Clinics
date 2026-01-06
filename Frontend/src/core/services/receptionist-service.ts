@@ -38,6 +38,10 @@ export class ReceptionistService {
     return this.http.post<void>(`${this.API_BASE}/appointments/${id}/check-in`, {});
   }
 
+  markNoShow(appointmentId: string): Observable<void> {
+    return this.http.post<void>(`${this.API_BASE}/appointments/${appointmentId}/no-show`, {});
+  }
+
   cancelAppointment(id: string): Observable<void> {
     return this.http.post<void>(`${this.API_BASE}/appointments/${id}/cancel`, {});
   }

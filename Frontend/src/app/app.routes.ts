@@ -5,6 +5,7 @@ import { authGuard } from '../core/guards/auth-guard';
 import { RoleName } from '../types/auth-types';
 import { PatientDetailComponent } from '../features/dashboard/patient-detail/patient-detail.component';
 import { ReceptionistDashboardComponent } from '../features/dashboard/receptionist-dashboard/receptionist-dashboard.component';
+import { ConsultationComponent } from '../features/consultation/consultation.component/consultation.component';
 
 export const routes: Routes = [
     {path: '', redirectTo:'Login',pathMatch:'full'},
@@ -20,6 +21,10 @@ export const routes: Routes = [
         component: ReceptionistDashboardComponent,
         canActivate: [authGuard],
         data: { roles: [RoleName.Receptionist, RoleName.SuperAdmin] }
+    },
+    { 
+        path: 'doctor/consultation/:patientId/:visitId', 
+        component: ConsultationComponent 
     },
     { path: 'patients', component: PatientDetailComponent },
     { path: 'patients/:id', component: PatientDetailComponent },

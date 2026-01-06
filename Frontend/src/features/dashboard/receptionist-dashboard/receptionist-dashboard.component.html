@@ -153,22 +153,50 @@
                   <tr>
                     <th>Time</th>
                     <th>Patient</th>
-                    <th>Doctor</th>
                     <th>Status</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="hover">
-                    <td class="font-mono">09:30</td>
-                    <td><span class="font-bold">Alice Johnson</span></td>
-                    <td>Dr. Smith</td>
-                    <td><span class="badge badge-warning">Waiting</span></td>
-                    <td class="flex gap-2">
-                      <button class="btn btn-xs btn-success text-white">Check-In</button>
-                      <button class="btn btn-xs btn-error text-white">No Show?</button>
-                    </td>
-                  </tr>
+                  @for (apt of appointments(); track apt.id) {
+                    <tr class="hover">
+                      <td class="font-mono text-sm">
+                        {{ apt.startTime | date:'HH:mm' }}
+                      </td>
+                      <td>
+                        <div class="font-bold">{{ apt.patientName }}</div>
+                        <div class="text-xs opacity-50">Dr. {{ apt.doctorName }}</div>
+                      </td>
+                      <td>
+                        <span [class]="'badge badge-sm ' + getStatusBadgeClass(apt.status)">
+                          {{ apt.status }}
+                        </span>
+                      </td>
+                      <td class="flex justify-end gap-2">
+                        @if (apt.status === "Confirmed") {
+                          <button 
+                            class="btn btn-xs btn-success text-white shadow-sm hover:scale-105 transition-transform"
+                            (click)="onCheckIn(apt.id)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                            Check-In
+                          </button>
+                          <button 
+                            class="btn btn-xs btn-outline btn-error hover:bg-error hover:text-white transition-colors"
+                            (click)="onNoShow(apt.id)">
+                            No Show
+                          </button>
+                        } @else if (apt.status === "InTreatment") {
+                          <span class="text-xs text-success font-medium flex items-center gap-1">
+                            <span class="relative flex h-2 w-2">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                            </span>
+                            In Treatment
+                          </span>
+                        }
+                      </td>
+                    </tr>
+                  }
                 </tbody>
               </table>
             </div>
