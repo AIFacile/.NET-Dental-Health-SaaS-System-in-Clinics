@@ -1,252 +1,405 @@
 <div class="flex h-screen bg-base-200">
-    <aside class="w-64 bg-base-100 shadow-xl flex flex-col">
-      <div class="p-6">
-        <h2 class="text-xl font-bold text-secondary flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" /></svg>
-          Reception Desk
-        </h2>
-      </div>
-  
-      <ul class="menu p-4 w-full grow text-base-content gap-2">
-        <li class="menu-title text-gray-400">Operations</li>
-        <li><a (click)="setSection('queue')" [class.active]="activeSection() === 'queue'">Today's Queue</a></li>
-        <li><a (click)="setSection('patients')" [class.active]="activeSection() === 'patients'">Patient Directory</a></li>
-        <li><a (click)="setSection('calendar')" [class.active]="activeSection() === 'calendar'">Scheduling</a></li>
-        
-        <div class="divider"></div>
-        
-        <li class="menu-title text-gray-400">Account</li>
-        <li><a (click)="auth.logout()" class="text-error font-semibold">Logout</a></li>
-      </ul>
+  <aside class="w-64 bg-base-100 shadow-xl flex flex-col">
+    <div class="p-6">
+      <h2 class="text-xl font-bold text-secondary flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+        </svg>
+        Reception Desk
+      </h2>
+    </div>
 
-      <div class="p-4 border-t border-base-300">
-        <div class="flex items-center gap-3">
-          <div class="avatar placeholder">
-            <div class="bg-neutral text-neutral-content rounded-full w-10">
-              <span>{{ auth.currentUser()?.username?.substring(0,2) }}</span>
+    <ul class="menu p-4 w-full grow text-base-content gap-2">
+      <li class="menu-title text-gray-400">Operations</li>
+      <li><a (click)="setSection('queue')" [class.active]="activeSection() === 'queue'">Today's Queue</a></li>
+      <li><a (click)="setSection('patients')" [class.active]="activeSection() === 'patients'">Patient Directory</a></li>
+      <li><a (click)="setSection('calendar')" [class.active]="activeSection() === 'calendar'">Scheduling</a></li>
+
+      <div class="divider"></div>
+
+      <li class="menu-title text-gray-400">Account</li>
+      <li><a (click)="auth.logout()" class="text-error font-semibold">Logout</a></li>
+    </ul>
+
+    <div class="p-4 border-t border-base-300">
+      <div class="flex items-center gap-3">
+        <div class="avatar placeholder">
+          <div class="bg-neutral text-neutral-content rounded-full w-10">
+            <span>{{ auth.currentUser()?.username?.substring(0,2) }}</span>
+          </div>
+        </div>
+        <div class="overflow-hidden">
+          <p class="font-bold text-sm truncate">{{ auth.currentUser()?.username }}</p>
+          <p class="text-xs opacity-50">{{ auth.currentUser()?.role }}</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="grow overflow-y-auto p-8">
+    <header class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold uppercase tracking-tight">Front Office</h1>
+        <p class="text-gray-500">Welcome, {{ auth.currentUser()?.username }}</p>
+      </div>
+      <!-- <button class="btn btn-primary" (click)="setSection('book-appointment')">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        Book Appointment
+      </button> -->
+      <button class="btn btn-secondary" (click)="setSection('add-patient')">
+        + Register New Patient
+      </button>
+    </header>
+
+    @if (activeSection() === 'add-patient') {
+
+    }
+
+    <!-- @if (activeSection() === 'book-appointment') {
+    <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto animate-fadeIn">
+      <div class="card-body">
+        <h2 class="card-title text-2xl mb-6 text-primary">Schedule New Appointment</h2>
+        <form [formGroup]="appointmentForm" (ngSubmit)="onSubmitAppointment()" class="space-y-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text">Select Patient *</span></label>
+            <select formControlName="patientId" class="select select-bordered w-full">
+              <option value="">-- Choose Patient --</option>
+              @for (p of patients(); track p.id) {
+              <option [value]="p.id">{{ p.name }} ({{ p.phone }})</option>
+              }
+            </select>
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text">Assigned Doctor *</span></label>
+            <select formControlName="doctorId" class="select select-bordered w-full">
+              <option value="">-- Choose Doctor --</option>
+              @for (d of doctors(); track d.id) {
+              <option [value]="d.id">{{ d.doctorName }}</option>
+              }
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-control">
+              <label class="label"><span class="label-text">Start Time *</span></label>
+              <input type="datetime-local" formControlName="startTime" class="input input-bordered" />
+            </div>
+            <div class="form-control">
+              <label class="label"><span class="label-text">End Time *</span></label>
+              <input type="datetime-local" formControlName="endTime" class="input input-bordered" />
             </div>
           </div>
-          <div class="overflow-hidden">
-            <p class="font-bold text-sm truncate">{{ auth.currentUser()?.username }}</p>
-            <p class="text-xs opacity-50">{{ auth.currentUser()?.role }}</p>
+          <div class="pt-6 flex justify-end gap-2">
+            <button type="button" class="btn btn-ghost" (click)="setSection('queue')">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="appointmentForm.invalid">Confirm Booking</button>
           </div>
+        </form>
+      </div>
+    </div>
+    } -->
+
+    @if (activeSection() === 'queue') {
+    <div class="space-y-6 animate-fadeIn">
+      <div class="alert alert-info shadow-lg bg-white border-l-8 border-info">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+          <h3 class="font-bold">Operational Tip</h3>
+          <div class="text-xs">Mark patients as "Checked-In" once they arrive at the lobby.</div>
         </div>
       </div>
-    </aside>
-  
-    <main class="grow overflow-y-auto p-8">
-      <header class="flex justify-between items-center mb-8">
-        <div>
-          <h1 class="text-3xl font-bold uppercase tracking-tight">Front Office</h1>
-          <p class="text-gray-500">Welcome, {{ auth.currentUser()?.username }}</p>
-        </div>
-        <button class="btn btn-primary" (click)="setSection('book-appointment')">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-            Book Appointment
-          </button>
-        <button class="btn btn-secondary" (click)="setSection('add-patient')">
-          + Register New Patient
-        </button>
-      </header>
 
-      @if (activeSection() === 'add-patient') {
-        <div class="card bg-base-100 shadow-xl max-w-4xl mx-auto animate-fadeIn">
-          <div class="card-body">
-            <h2 class="card-title text-2xl mb-6">Patient Registration</h2>
-            <form [formGroup]="patientForm" (ngSubmit)="onSubmitPatient()" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="form-control">
-                <label class="label"><span class="label-text">Patient Code *</span></label>
-                <input formControlName="patientCode" class="input input-bordered" placeholder="e.g. P-1001" />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">Full Name *</span></label>
-                <input formControlName="name" class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">Gender *</span></label>
-                <select formControlName="gender" class="select select-bordered">
-                  <option>Male</option><option>Female</option><option>Other</option>
-                </select>
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">Birth Date *</span></label>
-                <input type="date" formControlName="birthDate" class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">Phone</span></label>
-                <input formControlName="phone" class="input input-bordered" />
-              </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">Email</span></label>
-                <input type="email" formControlName="email" class="input input-bordered" />
-              </div>
-              <div class="form-control md:col-span-2">
-                <label class="label"><span class="label-text">Emergency Contact</span></label>
-                <input formControlName="emergencyContact" class="input input-bordered" placeholder="Name and Phone" />
-              </div>
-              <div class="md:col-span-2 mt-4 flex justify-end gap-2">
-                <button type="button" class="btn btn-ghost" (click)="setSection('patients')">Cancel</button>
-                <button type="submit" class="btn btn-secondary" [disabled]="patientForm.invalid">Save Patient</button>
-              </div>
-            </form>
-          </div>
+      <div class="card bg-base-100 shadow-xl border border-base-300">
+        <div class="card-body">
+          <h2 class="card-title mb-4">Current Queue</h2>
+          <table class="table table-zebra w-full">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Patient</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (apt of todayAppointments(); track apt.id) {
+              <tr class="hover">
+                <td class="font-mono text-sm">
+                  {{ apt.startTime | date:'HH:mm' }}
+                </td>
+                <td>
+                  <div class="font-bold">{{ apt.patientName }}</div>
+                  <div class="text-xs opacity-50">Dr. {{ apt.doctorName }}</div>
+                </td>
+                <td>
+                  <span [class]="'badge badge-sm ' + getStatusBadgeClass(apt.status)">
+                    {{ apt.status }}
+                  </span>
+                </td>
+                <td class="flex justify-start gap-2">
+                  @if (apt.status === "Confirmed") {
+                  <button class="btn btn-xs btn-success text-white shadow-sm hover:scale-105 transition-transform"
+                    (click)="onCheckIn(apt.id)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Check-In
+                  </button>
+                  <button class="btn btn-xs btn-outline btn-error hover:bg-error hover:text-white transition-colors"
+                    (click)="onNoShow(apt.id)">
+                    No Show
+                  </button>
+                  } @else if (apt.status === "InTreatment") {
+                  <span class="text-xs text-success font-medium flex items-center gap-1">
+                    <span class="relative flex h-2 w-2">
+                      <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                    </span>
+                    In Treatment
+                  </span>
+                  } @else {
+                    <span class="text-xs font-medium flex items-center gap-1">
+                      No Actions Can Be Made At the Time
+                    </span>
+                  }
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
         </div>
-      }
-  
-      @if (activeSection() === 'book-appointment') {
-        <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto animate-fadeIn">
-          <div class="card-body">
-            <h2 class="card-title text-2xl mb-6 text-primary">Schedule New Appointment</h2>
-            <form [formGroup]="appointmentForm" (ngSubmit)="onSubmitAppointment()" class="space-y-4">
-              <div class="form-control">
-                <label class="label"><span class="label-text">Select Patient *</span></label>
-                <select formControlName="patientId" class="select select-bordered w-full">
-                  <option value="">-- Choose Patient --</option>
-                  @for (p of patients(); track p.id) {
-                    <option [value]="p.id">{{ p.name }} ({{ p.phone }})</option>
-                  }
-                </select>
+      </div>
+    </div>
+    }
+
+    @if (activeSection() === 'patients') {
+    <div class="card bg-base-100 shadow-xl p-6 animate-fadeIn">
+      <div class="flex justify-between mb-6">
+        <h2 class="text-2xl font-bold">Patient Directory</h2>
+        <div class="join">
+          <input class="input input-bordered join-item input-sm" placeholder="Search Patients..." />
+          <button class="btn join-item btn-sm btn-primary">Search</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="table w-full">
+          <thead>
+            <tr>
+              <th>Patient Name</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Contact</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of patients(); track p.id) {
+            <tr>
+              <td>
+                <div class="font-bold">{{ p.name }}</div>
+              </td>
+              <td>{{ p.gender }}</td>
+              <td>{{ p.age }}</td>
+
+              <td>{{ p.phone }}</td>
+              <td>
+                <div class="flex gap-2">
+                  <button class="btn btn-ghost btn-xs text-info">Edit</button>
+                  <button class="btn btn-ghost btn-xs text-error">Delete</button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    }
+
+    @if (activeSection() == 'calendar') {
+    <div class="animate-fadeIn flex flex-col h-[calc(100vh-120px)]">
+      <input type="checkbox" id="quick-book-modal" class="modal-toggle" [checked]="isModalOpen()"
+        (change)="isModalOpen.set($any($event.target).checked)" />
+
+        <div class="modal modal-bottom sm:modal-middle" role="dialog">
+          <div class="modal-box max-w-lg border border-base-300 shadow-2xl">
+            
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-lg font-black flex items-center gap-2">
+                <span class="p-2 bg-primary/10 text-primary rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                </span>
+                Quick Appointment
+              </h3>
+              <button (click)="isModalOpen.set(false)" class="btn btn-sm btn-circle btn-ghost">✕</button>
+            </div>
+        
+            <form [formGroup]="quickBookForm" (ngSubmit)="onSaveAppointment()" class="space-y-4">
+              
+              <div class="form-control relative">
+                <label class="label font-bold text-xs">Search Patient</label>
+                <div class="join w-full">
+                  <input 
+                    type="text" 
+                    placeholder="Name / Phone / PID..." 
+                    class="input input-bordered join-item w-full"
+                    [formControlName]="'patientName'" 
+                    (input)="searchQuery.set($any($event.target).value)"
+                  />
+                  </div>
+              
+                @if (patients().length > 0) {
+                  <ul class="absolute z-100 top-18.5 w-full menu bg-base-100 rounded-box shadow-2xl border border-base-200 max-h-60 overflow-y-auto block">
+                    @for (p of patients(); track p.id) {
+                      <li class="border-b border-base-100 last:border-none">
+                        <a (click)="selectPatient(p)" class="flex justify-between py-3">
+                          <div class="flex flex-col">
+                            <span class="font-bold">{{ p.name }}</span>
+                            <span class="text-[10px] opacity-50">PID: {{ p.id.substring(0,8) }}</span>
+                          </div>
+                          <span class="text-xs badge badge-ghost">{{ p.phone }}</span>
+                        </a>
+                      </li>
+                    }
+                  </ul>
+                }
               </div>
-              <div class="form-control">
-                <label class="label"><span class="label-text">Assigned Doctor *</span></label>
-                <select formControlName="doctorId" class="select select-bordered w-full">
-                  <option value="">-- Choose Doctor --</option>
-                  @for (d of doctors(); track d.id) {
-                    <option [value]="d.id">{{ d.doctorName }}</option>
-                  }
-                </select>
-              </div>
+        
               <div class="grid grid-cols-2 gap-4">
                 <div class="form-control">
-                  <label class="label"><span class="label-text">Start Time *</span></label>
-                  <input type="datetime-local" formControlName="startTime" class="input input-bordered" />
+                  <label class="label font-bold text-xs">Doctor</label>
+                  <select formControlName="doctorId" class="select select-bordered select-sm">
+                    @for (dr of doctors(); track dr.id) {
+                      <option [value]="dr.id">{{ dr.doctorName }}</option>
+                    }
+                  </select>
                 </div>
                 <div class="form-control">
-                  <label class="label"><span class="label-text">End Time *</span></label>
-                  <input type="datetime-local" formControlName="endTime" class="input input-bordered" />
+                  <label class="label font-bold text-xs">Duration</label>
+                  <select formControlName="duration" class="select select-bordered select-sm">
+                    <option [value]="15">15 Mins</option>
+                    <option [value]="30">30 Mins</option>
+                    <option [value]="60">1 Hour</option>
+                    <option [value]="90">1.5 Hours</option>
+                    <option [value]="120">2 Hours</option>
+                  </select>
                 </div>
               </div>
-              <div class="pt-6 flex justify-end gap-2">
-                <button type="button" class="btn btn-ghost" (click)="setSection('queue')">Cancel</button>
-                <button type="submit" class="btn btn-primary" [disabled]="appointmentForm.invalid">Confirm Booking</button>
+        
+              <div class="form-control">
+                <label class="label font-bold text-xs">Start Time</label>
+                <input type="datetime-local" formControlName="startTime" class="input input-sm input-bordered" />
+              </div>
+        
+              <div class="modal-action">
+                <button type="button" (click)="isModalOpen.set(false)" class="btn btn-ghost">Cancel</button>
+                <button 
+                  type="submit" 
+                  class="btn btn-primary px-8" 
+                  [disabled]="quickBookForm.invalid">
+                  Confirm Booking
+                </button>
               </div>
             </form>
+        
           </div>
+          <label class="modal-backdrop" (click)="isModalOpen.set(false)">Close</label>
         </div>
-      }
-  
-      @if (activeSection() === 'queue') {
-        <div class="space-y-6 animate-fadeIn">
-          <div class="alert alert-info shadow-lg bg-white border-l-8 border-info">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <div>
-              <h3 class="font-bold">Operational Tip</h3>
-              <div class="text-xs">Mark patients as "Checked-In" once they arrive at the lobby.</div>
-            </div>
-          </div>
-  
-          <div class="card bg-base-100 shadow-xl border border-base-300">
-            <div class="card-body">
-              <h2 class="card-title mb-4">Current Queue</h2>
-              <table class="table table-zebra w-full">
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Patient</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (apt of appointments(); track apt.id) {
-                    <tr class="hover">
-                      <td class="font-mono text-sm">
-                        {{ apt.startTime | date:'HH:mm' }}
-                      </td>
-                      <td>
-                        <div class="font-bold">{{ apt.patientName }}</div>
-                        <div class="text-xs opacity-50">Dr. {{ apt.doctorName }}</div>
-                      </td>
-                      <td>
-                        <span [class]="'badge badge-sm ' + getStatusBadgeClass(apt.status)">
-                          {{ apt.status }}
-                        </span>
-                      </td>
-                      <td class="flex justify-end gap-2">
-                        @if (apt.status === "Confirmed") {
-                          <button 
-                            class="btn btn-xs btn-success text-white shadow-sm hover:scale-105 transition-transform"
-                            (click)="onCheckIn(apt.id)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                            Check-In
-                          </button>
-                          <button 
-                            class="btn btn-xs btn-outline btn-error hover:bg-error hover:text-white transition-colors"
-                            (click)="onNoShow(apt.id)">
-                            No Show
-                          </button>
-                        } @else if (apt.status === "InTreatment") {
-                          <span class="text-xs text-success font-medium flex items-center gap-1">
-                            <span class="relative flex h-2 w-2">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                              <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-                            </span>
-                            In Treatment
-                          </span>
-                        }
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      }
-  
-      @if (activeSection() === 'patients') {
-        <div class="card bg-base-100 shadow-xl p-6 animate-fadeIn">
-          <div class="flex justify-between mb-6">
-            <h2 class="text-2xl font-bold">Patient Directory</h2>
-            <div class="join">
-              <input class="input input-bordered join-item input-sm" placeholder="Search Patients..."/>
-              <button class="btn join-item btn-sm btn-primary">Search</button>
-            </div>
-          </div>
-  
-          <div class="overflow-x-auto">
-            <table class="table w-full">
-              <thead>
-                <tr>
-                  <th>Patient Name</th>
-                  <th>Gender</th>
-                  <th>Age</th>
-                  <th>Contact</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (p of patients(); track p.id) {
-                  <tr>
-                    <td>
-                      <div class="font-bold">{{ p.name }}</div>
-                    </td>
-                    <td>{{ p.gender }}</td>
-                    <td>{{ p.age }}</td>
 
-                    <td>{{ p.phone }}</td>
-                    <td>
-                      <div class="flex gap-2">
-                        <button class="btn btn-ghost btn-xs text-info">Edit</button>
-                        <button class="btn btn-ghost btn-xs text-error">Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+      <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-base-100 border-b border-base-300 shadow-sm">
+        <div class="flex items-center gap-2">
+          <h2 class="text-xl font-bold w-48">{{ selectedDate() | date:'EEEE, MMM d' }}</h2>
+          <div class="join">
+            <button (click)="changeDate(-1)" class="btn join-item btn-sm btn-outline">«</button>
+            <button (click)="selectedDate.set(today)" class="btn join-item btn-sm btn-outline">Today</button>
+            <button (click)="changeDate(1)" class="btn join-item btn-sm btn-outline">»</button>
           </div>
         </div>
-      }
-    </main>
-  </div>
+
+        <div class="flex items-center gap-4">
+          <select class="select select-sm select-bordered w-48"
+            (change)="selectedDoctorId.set($any($event.target).value)">
+            <option value="">All Doctors</option>
+            @for (dr of doctors(); track dr.id) {
+            <option [value]="dr.id">{{ dr.doctorName }}</option>
+            }
+          </select>
+          <button class="btn btn-primary btn-sm" (click)="openQuickBook()">+ New Appointment</button>
+        </div>
+      </div>
+
+      <div class="grow overflow-y-auto bg-base-200/30">
+        <div class="max-w-5xl mx-auto bg-base-100 shadow-inner relative" style="min-height: 880px;">
+
+          @for (hour of timeSlots; track hour) {
+          <div class="absolute w-full border-t border-base-200" [style.top.px]="(hour - 8) * 80">
+            <span class="text-[10px] text-base-content/40 ml-2">{{ hour }}:00</span>
+          </div>
+          }
+
+          @for (apt of appointments(); track apt.id) {
+            <div
+              class="absolute left-16 right-4 p-1.5 rounded-lg border-l-4 shadow-sm text-sm overflow-hidden 
+                     group cursor-pointer transition-all duration-300 ease-in-out
+                     backdrop-blur-md bg-opacity-70
+                     hover:shadow-xl hover:scale-[1.02] hover:z-50 hover:h-auto hover:min-h-28"
+              [ngClass]="getStatusClass(apt.status)" 
+              [style]="getAppointmentStyle(apt)">
+              
+              <div class="flex justify-between items-start">
+                <span class="font-bold truncate group-hover:text-primary transition-colors">
+                  {{ apt.patientName }}
+                </span>
+                <span class="text-[10px] opacity-60 group-hover:hidden">✕</span>
+              </div>
+          
+              <div class="max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 transition-all duration-500 overflow-hidden">
+                <div class="mt-2 pt-2 border-t border-base-content/10 space-y-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold">Doctor:</span>
+                    <span class="text-xs italic opacity-80">Dr. {{ apt.doctorName }}</span>
+                  </div>
+                  
+                  <div class="flex items-center gap-2 text-[11px]">
+                    <span class="font-semibold">Time:</span>
+                    <span>{{ apt.startTime | date:'HH:mm' }} - {{ apt.endTime | date:'HH:mm' }}</span>
+                  </div>
+          
+                  <div class="flex items-center gap-2 text-[11px]">
+                    <span [class]="'badge badge-sm ' + getStatusBadgeClass(apt.status)">
+                      {{ apt.status }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+          
+              <div class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button (click)="cancelAppointment(apt.id); $event.stopPropagation()" 
+                        class="btn btn-xs btn-circle btn-error btn-outline hover:bg-error hover:text-white">
+                  ✕
+                </button>
+              </div>
+            </div>
+          }
+          <div class="absolute left-0 w-full border-t-2 border-error z-20 pointer-events-none"
+            [style.top.px]="getCurrentTimeOffset()">
+            <div class="w-2 h-2 rounded-full bg-error -ml-1 -mt-1"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    }
+
+
+  </main>
+</div>

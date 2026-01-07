@@ -25,7 +25,7 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Auth
 
             var claims = new List<Claim>
             {
-                new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Username),
                 new("tenant_id", user.TenantId.ToString()),
             };

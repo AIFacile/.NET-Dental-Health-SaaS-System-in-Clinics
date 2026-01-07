@@ -39,6 +39,6 @@ namespace DentalHealthSaaS.Backend.src.Infrastructure.Identity
         public bool HasUser =>
             _http.HttpContext?
             .User?
-            .HasClaim(u => u.Type == JwtRegisteredClaimNames.Sub) == true;
+            .HasClaim(c => c.Type == ClaimTypes.NameIdentifier) == true;
     }
 }

@@ -8,9 +8,10 @@ namespace DentalHealthSaaS.Backend.src.Application.Abstractions.Appointments
         Task<IReadOnlyList<AppointmentDto>> GetByPatientAsync(Guid patientId);
         Task<IReadOnlyList<AppointmentDto>> GetByDoctorAsync();
         Task<IReadOnlyList<AppointmentDto>> GetByDoctorTodayAsync();
+        Task<IReadOnlyList<AppointmentDto>> GetAllAsync();
         Task<AppointmentDto> CreateAsync(CreateAppointmentDto dto);
         Task UpdateAsync(Guid id, UpdateAppointmentDto dto);
-        Task<IReadOnlyList<AppointmentDto>> GetTodayAsync();
+        Task<IReadOnlyList<AppointmentDto>> GetByDateAsync(DateTime date);
         Task CancelAsync(Guid appointmentId);
         Task<VisitDto> CheckInAsync(Guid appointmentId);
         Task ConfirmAsync(Guid appointmentId);

@@ -61,6 +61,20 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         public async Task<ActionResult<IReadOnlyList<AppointmentDto>>> GetByPatient(Guid patientId)
             => Ok(await _service.GetByPatientAsync(patientId));
 
+        // GET /api/patients/{patientId}/appointments
+        // This API is for recptionists to see a patient's appointments.
+        // The root page should be patient list.
+        //[HttpGet("/api/appointments")]
+        //public async Task<ActionResult<IReadOnlyList<AppointmentDto>>> GetAll()
+        //    => Ok(await _service.GetAllAsync());
+
+        // GET /api/appointments/{date}
+        // This API is for recptionists to see a patient's appointments.
+        // The root page should be patient list.
+        [HttpGet("/api/appointments")]
+        public async Task<ActionResult<IReadOnlyList<AppointmentDto>>> GetByDate([FromQuery] DateTime date)
+            => Ok(await _service.GetByDateAsync(date));
+
         // POST /api/appointments
         // This API allows receptionists to create appointments.
         // The root page should be appointment list.
@@ -72,10 +86,12 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             return NoContent();
         }
 
-        //
-        [HttpGet("/api/appointments/today")]
-        public async Task<ActionResult<IReadOnlyList<AppointmentDto>>> GetToday()
-            => Ok(await _service.GetTodayAsync());
+        // GET /api/appointments/today
+        // This API is for receptionists to get today's appointments.
+        // The root page should be appointment list.
+        //[HttpGet("/api/appointments/today")]
+        //public async Task<ActionResult<IReadOnlyList<AppointmentDto>>> GetToday()
+        //    => Ok(await _service.GetByDateAsync(DateTime.Today));
 
         // PUT /api/appointments/{id}
         // This API is for receptionists to update appointments.

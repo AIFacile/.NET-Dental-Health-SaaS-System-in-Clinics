@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 import { Observable } from "rxjs";
 import { AppointmentDto } from "../../types/appointment-types";
@@ -19,4 +19,13 @@ export class AppointmentService {
   confirm(id: string): Observable<void> {
     return this.http.post<void>(`${this.API_URL}/${id}/confirm`, {});
   }
+
+  deleteAppointment(id: string): Observable<void>{
+    return this.http.delete<void>(`${this.API_URL}/${id}`);
+  }
+
+  cancelAppointment(id: string): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/appointments/${id}/cancel`, {});
+  }
+
 }

@@ -18,7 +18,7 @@ export enum RoleName {
 }
 
 export interface DecodedToken {
-  sub: string;
+  user_id: string;
   tenant_id: string;
   exp: number;
   permissions: string[];

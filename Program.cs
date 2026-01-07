@@ -39,6 +39,8 @@ namespace DentalHealthSaaS
 
             builder.Services.AddAuthorization();
 
+            builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+
             builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
                 options.UseSqlServer(
@@ -52,6 +54,8 @@ namespace DentalHealthSaaS
             // Scope usercontext and tenantcontext to provide user&tenant data to other services.
             builder.Services.AddScoped<IUserContext, UserContext>();
             builder.Services.AddScoped<ITenantContext, TenantContext>();
+
+            // Scope buisness services
             builder.Services.AddScoped<IPatientService, PatientService>();
             builder.Services.AddScoped<IAppointmentService, AppointmentService>();
             builder.Services.AddScoped<IDiagnosisService, DiagnosisService>();
@@ -60,6 +64,8 @@ namespace DentalHealthSaaS
             builder.Services.AddScoped<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+
+            // Scope rescource-based authorization handler
             builder.Services.AddScoped<IAuthorizationHandler, OwnsVisitHandler>();
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

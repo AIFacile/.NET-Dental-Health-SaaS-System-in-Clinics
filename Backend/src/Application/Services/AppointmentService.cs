@@ -30,7 +30,11 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
             if (dto.StartTime <= DateTime.UtcNow)
                 throw new Exception("Cannot create appointment in the past.");
 
-            var hasConflict = await _db.Appointments.AnyAsync(a => 
+            var newStart = dto.StartTime.ToUniversalTime();
+            var newEnd = dto.EndTime.ToUniversalTime();
+
+            var hasConflict = await _db.Appointments.AnyAsync(a =>
+                a.Id != dto.Id &&
                 a.DoctorId == dto.DoctorId &&
                 a.Status != AppointmentStatus.Cancelled &&
                 dto.StartTime < a.EndTime &&
@@ -103,9 +107,9 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 .ToListAsync();
         }
 
-        public async Task<IReadOnlyList<AppointmentDto>> GetTodayAsync()
+        public async Task<IReadOnlyList<AppointmentDto>> GetByDateAsync(DateTime date)
         {
-            var todayStart = DateTime.Today;
+            var todayStart = date;
             var tomorrowStart = todayStart.AddDays(1);
 
             return await _db.Appointments
@@ -115,10 +119,19 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 .Where(a =>
                     a.StartTime >= todayStart &&
                     a.StartTime < tomorrowStart &&
-                    a.Status == AppointmentStatus.Confirmed &&
                     a.Status != AppointmentStatus.Cancelled
                 )
                 .OrderBy(a => a.StartTime)
+                .Select(a => a.ToDto())
+                .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<AppointmentDto>> GetAllAsync()
+        {
+            return await _db.Appointments
+                .AsNoTracking()
+                .Include(a => a.Patient)
+                .Include(a => a.Doctor)
                 .Select(a => a.ToDto())
                 .ToListAsync();
         }
