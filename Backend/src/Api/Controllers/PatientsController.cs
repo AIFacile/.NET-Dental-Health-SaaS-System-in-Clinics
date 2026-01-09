@@ -13,7 +13,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
     //DELETE /api/patients/{id}
 
     [ApiController]
-    [Route("api/patients")]
+    [Route("api/[controller]")]
     public class PatientsController(IPatientService service) : ControllerBase
     {
         private readonly IPatientService _service = service;
@@ -24,7 +24,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             => Ok(await _service.GetAllAsync());
 
         [Authorize(Policy = Permissions.Patients_Read)]
-        [HttpGet("/{id:guid}")]
+        [HttpGet("{id:guid}")]
         public async Task<ActionResult<PatientDto>> GetById(Guid id)
             => Ok(await _service.GetByIdAsync(id));
 
@@ -34,7 +34,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
             => Ok(await _service.CreateAsync(dto));
 
         [Authorize(Policy = Permissions.Patients_Write)]
-        [HttpPut("/{id:guid}")]
+        [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, UpdatePatientDto dto)
         {
             await _service.UpdateAsync(id, dto);
@@ -43,7 +43,7 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
         }
 
         [Authorize(Policy = Permissions.Patients_Delete)]
-        [HttpDelete("/{id:guid}")]
+        [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete(Guid id)
         {
             await _service.DeleteAsync(id);

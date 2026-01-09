@@ -67,6 +67,7 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
                 .Include(a => a.Patient)
                 .Include(a => a.Doctor)
                 .Where(a => a.DoctorId == doctorId)
+                .OrderByDescending(a => a.StartTime)
                 .Select(a => a.ToDto())
                 .ToListAsync();
         }

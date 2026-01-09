@@ -3,7 +3,9 @@ import { Component, OnInit, inject, signal } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators, FormArray } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 import { ConsultationService } from "../../../core/services/consultation-service";
-import { HealthRecordDto, DiagnosisDto, TreatmentPlanDto } from "../../../types/consultation-types";
+import { HealthRecordDto, DiagnosisDto, TreatmentPlanDto, VisitDto, DiagnosisItemDto } from "../../../types/consultation-types";
+import { Patient } from "../../../types/patient-types";
+import { switchMap } from "rxjs/operators";
 
 @Component({
   selector: 'app-consultation',
@@ -19,6 +21,7 @@ export class ConsultationComponent implements OnInit {
   selectedTeeth = signal<string[]>([]);
 
   // IDs form Route
+  patient = signal<Patient | null>(null);
   patientId = signal<string>('');
   visitId = signal<string>('');
 
@@ -29,6 +32,7 @@ export class ConsultationComponent implements OnInit {
   // Data State
   healthRecords = signal<HealthRecordDto[]>([]);
   diagnosisHistory = signal<DiagnosisDto[]>([]);
+  visits = signal<VisitDto[]>([]);
   currentPlan = signal<TreatmentPlanDto | null>(null);
 
   // Forms
@@ -44,10 +48,9 @@ export class ConsultationComponent implements OnInit {
   });
 
   ngOnInit() {
-    // 获取路由参数
     this.route.params.subscribe(params => {
       this.patientId.set(params['patientId']);
-      this.visitId.set(params['visitId']); // 假设 Appointment 中已有 VisitId
+      this.visitId.set(params['visitId']);
       this.loadData();
     });
   }
@@ -57,9 +60,10 @@ export class ConsultationComponent implements OnInit {
     const pid = this.patientId();
     const vid = this.visitId();
 
-    // 并行加载数据
     this.consultationService.getHealthRecords(pid).subscribe(data => this.healthRecords.set(data));
     this.consultationService.getDiagnosis(pid).subscribe(data => this.diagnosisHistory.set(data));
+    this.consultationService.getPatient(pid).subscribe(data => this.patient.set(data));
+    this.consultationService.getVisits(pid).subscribe(data => this.visits.set(data));
     // Load other necessary data...
     this.isLoading.set(false);
   }
@@ -71,13 +75,10 @@ export class ConsultationComponent implements OnInit {
     const index = current.indexOf(toothNum);
 
     if (index > -1) {
-      // 如果已经选中，则移除（可选：同时移除表单项）
       this.selectedTeeth.set(current.filter(t => t !== toothNum));
-      // 逻辑：你可以选择是否自动删除对应的 FormArray 项
     } else {
-      // 选中新牙齿
       this.selectedTeeth.set([...current, toothNum]);
-      this.addDiagnosisItem(toothNum); // 自动添加表单行
+      this.addDiagnosisItem(toothNum);
     }
   }
 
@@ -85,7 +86,6 @@ export class ConsultationComponent implements OnInit {
     return this.diagnosisForm.get('items') as FormArray;
   }
 
-  // 修改原有的 addDiagnosisItem 接受参数
   addDiagnosisItem(toothPos: string = '') {
     const itemGroup = this.fb.group({
       toothPosition: [toothPos, Validators.required],
@@ -97,19 +97,29 @@ export class ConsultationComponent implements OnInit {
   }
 
   saveDiagnosis() {
+    const { summary, items } = this.diagnosisForm.getRawValue();
+    
     const payload = {
-      patientId: this.patientId(),
       visitId: this.visitId(),
-      diagnosisDate: new Date().toISOString(),
-      status: 0, // Confirmed
-      ...this.diagnosisForm.value
+      status: "In Treatment",
+      summary: summary || '',
+      items: (items as any[]).map(item => ({
+        toothPosition: item.toothPosition,
+        diseaseName: item.diseaseName,
+        severity: item.severity,
+        notes: item.notes
+      }))
     };
-    // Call service...
-    console.log('Saving Diagnosis:', payload);
-    alert('Diagnosis Saved (Mock)');
+  
+    this.consultationService.saveDiagnosis(this.patientId(), payload).subscribe({
+      next: (result) => {
+        alert('Diagnosis and Visit status updated!');
+        this.diagnosisForm.patchValue(result);
+      },
+      error: (err) => alert('Save failed: ' + err.message)
+    });
   }
 
-  // 定义常用短语库
   commonDiagnoses = [
     { category: 'Caries', items: ['Deep Caries', 'Enamel Caries', 'Secondary Caries'] },
     { category: 'Endo', items: ['Acute Pulpitis', 'Chronic Pulpitis', 'Periapical Periodontitis'] },
@@ -117,18 +127,17 @@ export class ConsultationComponent implements OnInit {
     { category: 'Other', items: ['Tooth Fracture', 'Wisdom Tooth Impaction', 'Dentin Hypersensitivity'] }
   ];
 
-  // 快速填充方法
   quickFill(disease: string) {
     const items = this.diagnosisItems;
     if (items.length > 0) {
-      // 填充到最后一个条目（如果它是空的）
+
       const lastItem = items.at(items.length - 1);
       if (!lastItem.get('diseaseName')?.value) {
         lastItem.patchValue({ diseaseName: disease });
         return;
       }
     }
-    // 否则新建一个条目
+
     this.addDiagnosisItem('');
     items.at(items.length - 1).patchValue({ diseaseName: disease });
   }
@@ -165,10 +174,6 @@ export class ConsultationComponent implements OnInit {
     alert('Plan Saved (Mock)');
   }
 
-  /**
- * 功能 1：单纯的导航回退
- * 逻辑：检查表单是否有未保存的更改 (Dirty Check)
- */
   goBack() {
     const hasUnsavedChanges = this.diagnosisForm.dirty || this.treatmentForm.dirty;
 
@@ -213,13 +218,13 @@ export class ConsultationComponent implements OnInit {
   //   }
   // }
   // 历史记录模型
-patientHistory = signal<any[]>([]);
-medicalAlerts = signal<string[]>(['Penicillin Allergy', 'Hypertension']); // 示例过敏史
+  patientHistory = signal<any[]>([]);
+  medicalAlerts = signal<string[]>(['Penicillin Allergy', 'Hypertension']); // 示例过敏史
 
-loadHealthRecord(patientId: string) {
-  this.consultationService.getHealthRecords(patientId).subscribe({
-    next: (data) => this.patientHistory.set(data),
-    error: (err) => console.error('Failed to load history', err)
-  });
-}
+  loadHealthRecord(patientId: string) {
+    this.consultationService.getHealthRecords(patientId).subscribe({
+      next: (data) => this.patientHistory.set(data),
+      error: (err) => console.error('Failed to load history', err)
+    });
+  }
 }

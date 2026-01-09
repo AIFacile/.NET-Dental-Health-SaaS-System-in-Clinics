@@ -9,7 +9,7 @@
             </div>
           </div>
           <div>
-            <h2 class="font-bold text-lg">Patient Name</h2> <div class="text-xs text-slate-500">PID: {{ patientId().substring(0,8) }}</div>
+            <h2 class="font-bold text-lg">{{ patient()?.name }}</h2> <div class="text-xs text-slate-500">Code: {{ patient()?.patientCode }}</div>
           </div>
         </div>
         <div class="badge badge-error gap-1 w-full" title="Allergies">
@@ -101,12 +101,12 @@
             
             <div class="card bg-base-100 border border-base-300 p-4 shadow-sm">
               <div class="text-xs opacity-50 uppercase font-bold">Total Visits</div>
-              <div class="text-2xl font-black">{{ patientHistory().length }}</div>
+              <div class="text-2xl font-black">{{ visits().length }}</div>
             </div>
       
             <div class="card bg-base-100 border border-base-300 p-4 shadow-sm">
               <div class="text-xs opacity-50 uppercase font-bold">Last Visit</div>
-              <div class="text-lg font-bold">{{ patientHistory()[0]?.visitDate | date:'yyyy-MM-dd' }}</div>
+              <div class="text-lg font-bold">{{ visits()[0]?.visitDate | date:'dd/mm/yyyy' }}</div>
             </div>
           </div>
       
@@ -294,9 +294,10 @@
                             <span class="text-[10px] uppercase font-bold text-slate-400">Tooth</span>
                             <input formControlName="toothPosition" class="w-12 h-10 bg-primary/10 text-primary font-bold text-center rounded-lg border-none focus:ring-2 focus:ring-primary" />
                           </div>
-                          
+
                           <div class="grow space-y-2">
                             <input formControlName="diseaseName" placeholder="Condition (e.g. Caries)" class="input input-sm input-bordered w-full" />
+                            <input formControlName="notes" placeholder="Notes(optional)" class="input input-sm input-bordered w-full" />
                             <div class="flex gap-2">
                               <select formControlName="severity" class="select select-sm select-bordered grow">
                                 <option>Mild</option><option>Moderate</option><option>Severe</option>

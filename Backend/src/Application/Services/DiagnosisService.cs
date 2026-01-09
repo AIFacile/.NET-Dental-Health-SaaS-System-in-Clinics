@@ -118,5 +118,99 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
 
             await _db.SaveChangesAsync();
         }
+
+        public async Task<DiagnosisDto> UpsertAsync(Guid patientId, SaveDiagnosisDto dto)
+        {
+            using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                var visit = await _db.Visits
+                    .FirstOrDefaultAsync(v => v.Id == dto.VisitId && v.PatientId == patientId)
+                    ?? throw new Exception("Visit not found or access denied.");
+
+                if (visit.Status == VisitStatus.Open)
+                {
+                    visit.Status = VisitStatus.Diagnosed;
+                }
+
+                var diagnosis = await _db.Diagnoses
+                    .Include(d => d.Items)
+                    .FirstOrDefaultAsync(d => d.VisitId == dto.VisitId);
+
+                if (diagnosis == null)
+                {
+                    diagnosis = new Diagnosis
+                    {
+                        Id = Guid.NewGuid(),
+                        PatientId = patientId,
+                        VisitId = dto.VisitId,
+                        CreatedBy = _user.UserId,
+                        DiagnosisDate = DateTime.UtcNow,
+                        Status = DiagnosisStatus.Draft,
+                        Summary = dto.Summary,
+                        Items = [.. dto.Items.Select(i => new DiagnosisItem
+                        {
+                            Id = Guid.NewGuid(),
+                            ToothPosition = i.ToothPosition,
+                            DiseaseName = i.DiseaseName,
+                            Severity = i.Severity,
+                            Notes = i.Notes
+                        })]
+                    };
+                    _db.Diagnoses.Add(diagnosis);
+                }
+                else
+                {
+                    diagnosis.Status = DiagnosisStatus.PendingReview;
+                    diagnosis.Summary = dto.Summary;
+
+                    var dtoItemIds = dto.Items
+                        .Where(i => i.Id.HasValue)
+                        .Select(i => i.Id!.Value)
+                        .ToHashSet();
+
+                    var itemsToRemove = diagnosis.Items
+                        .Where(i => !dtoItemIds.Contains(i.Id))
+                        .ToList();
+                    foreach (var item in itemsToRemove) _db.DiagnosisItems.Remove(item);
+
+                    foreach (var itemDto in dto.Items)
+                    {
+                        if (!itemDto.Id.HasValue)
+                        {
+                            diagnosis.Items.Add(new DiagnosisItem
+                            {
+                                Id = Guid.NewGuid(),
+                                ToothPosition = itemDto.ToothPosition,
+                                DiseaseName = itemDto.DiseaseName,
+                                Severity = itemDto.Severity,
+                                Notes = itemDto.Notes
+                            });
+                        }
+                        else
+                        {
+                            var existing = diagnosis.Items.FirstOrDefault(i => i.Id == itemDto.Id.Value);
+                            if (existing != null)
+                            {
+                                existing.ToothPosition = itemDto.ToothPosition;
+                                existing.DiseaseName = itemDto.DiseaseName;
+                                existing.Severity = itemDto.Severity;
+                                existing.Notes = itemDto.Notes;
+                            }
+                        }
+                    }
+                }
+
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return diagnosis.ToDto();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

@@ -11,7 +11,9 @@ namespace DentalHealthSaaS.Backend.src.Application.Mappings
             {
                 Id = entity.Id,
                 PatientId = entity.PatientId,
+                Patient = entity.Patient,
                 VisitId = entity.VisitId,
+                Visit = entity.Visit,
                 DentalStatus = entity.DentalStatus,
                 ToothPosition = entity.ToothPosition,
                 RecordedAt = entity.RecordedAt,

@@ -10,5 +10,6 @@ namespace DentalHealthSaaS.Backend.src.Application.Abstractions.Diagnoses
             Guid patientId,
             CreateDiagnosisDto dto);
         Task UpdateAsync(Guid id, UpdateDiagnosisDto dto);
+        Task<DiagnosisDto> UpsertAsync(Guid id, SaveDiagnosisDto dto);
     }
 }

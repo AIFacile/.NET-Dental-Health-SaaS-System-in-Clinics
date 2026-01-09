@@ -43,5 +43,13 @@ namespace DentalHealthSaaS.Backend.src.Api.Controllers
 
             return NoContent();
         }
+
+        [Authorize(Policy = Permissions.Diagnoses_Write)]
+        [HttpPost("/api/patients/{patientId:guid}/diagnoses")]
+        public async Task<ActionResult<DiagnosisDto>> Upsert(Guid patientId, SaveDiagnosisDto dto)
+        {
+            await _service.UpsertAsync(patientId, dto);
+            return NoContent();
+        }
     }
 }

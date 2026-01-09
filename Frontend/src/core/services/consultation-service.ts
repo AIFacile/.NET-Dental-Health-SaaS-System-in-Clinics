@@ -1,12 +1,29 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 import { Observable } from "rxjs";
-import { DiagnosisDto, HealthRecordDto, TreatmentPlanDto } from "../../types/consultation-types";
+import { DiagnosisDto, HealthRecordDto, TreatmentPlanDto, VisitDto } from "../../types/consultation-types";
+import { Patient } from "../../types/patient-types";
 
 @Injectable({ providedIn: 'root' })
 export class ConsultationService {
   private http = inject(HttpClient);
   private readonly API_BASE = 'https://localhost:7168/api';
+
+  getPatient(patientId: string): Observable<Patient> {
+    return this.http.get<Patient>(`${this.API_BASE}/patients/${patientId}`);
+  }
+
+  getVisits(patientId: string): Observable<VisitDto[]> {
+    return this.http.get<VisitDto[]>(`${this.API_BASE}/patients/${patientId}/visits`);
+  }
+
+  startDiagnosis(visitId: string): Observable<void> {
+    return this.http.post<void>(`${this.API_BASE}/visits/${visitId}/start-diagnosis`, {});
+  }
+
+  startTreatment(visitId: string): Observable<void> {
+    return this.http.post<void>(`${this.API_BASE}/visits/${visitId}/start-treatment`, {});
+  }
 
   // --- Diagnosis ---
   getDiagnosis(patientId: string): Observable<DiagnosisDto[]> {

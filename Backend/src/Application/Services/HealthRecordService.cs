@@ -48,6 +48,8 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
             return await _db.HealthRecords
                 .Where(r => r.PatientId == patientId)
                 .AsNoTracking()
+                .Include(p => p.Patient)
+                .Include(v => v.Visit)
                 .OrderByDescending(r => r.RecordedAt)
                 .Select(r => r.ToDto())
                 .ToListAsync();
@@ -58,6 +60,8 @@ namespace DentalHealthSaaS.Backend.src.Application.Services
             return await _db.HealthRecords
                 .Where(r => r.VisitId == visitId)
                 .AsNoTracking()
+                .Include(p => p.Patient)
+                .Include(v => v.Visit)
                 .OrderBy(r => r.ToothPosition)
                 .Select(r => r.ToDto())
                 .ToListAsync();

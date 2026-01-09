@@ -1,10 +1,12 @@
-﻿namespace DentalHealthSaaS.Backend.src.Application.DTOs.Diagnoses
+﻿using DentalHealthSaaS.Backend.src.Domain.Diagnoses;
+
+namespace DentalHealthSaaS.Backend.src.Application.DTOs.Diagnoses
 {
     public class CreateDiagnosisDto
     {
         public Guid VisitId { get; set; }
         public DateTime DiagnosisDate { get; set; }
-        public string Status { get; set; } = "Confirmed";
+        public DiagnosisStatus Status { get; set; } = DiagnosisStatus.Draft;
         public string? Summary { get; set; }
 
         public List<CreateDiagnosisItemDto> Items { get; set; } = [];

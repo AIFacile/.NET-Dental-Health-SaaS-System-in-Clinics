@@ -4,6 +4,15 @@ export enum TreatmentPlanStatus { Draft = 0, Active = 1, Completed = 2 }
 export enum TreatmentStepStatus { Pending = 0, InProgress = 1, Completed = 2 }
 
 // DTOs
+export interface VisitDto {
+  id?: string;
+  visitDate: string;
+  visitType: string;
+  status: string;
+  patientId: string;
+  DoctorId: string;
+}
+
 export interface DiagnosisItemDto {
   id?: string;
   toothPosition: string;
@@ -16,9 +25,8 @@ export interface DiagnosisDto {
   id: string;
   visitId: string;
   patientId: string;
-  doctorId: string;
   diagnosisDate: string;
-  status: DiagnosisStatus;
+  status: string;
   summary?: string;
   items: DiagnosisItemDto[];
 }
